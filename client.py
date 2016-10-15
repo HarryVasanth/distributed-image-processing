@@ -20,7 +20,10 @@ if __name__ == '__main__':
         result = applyGauss.delay(matrix,sigma) # Puts a new task in the queue
 
         print("Matrix after applying gaussian filter:")
+        
+        #TODO this will lead to a deadlock we can use a limit of time
         print(result.get()) # Gets the result from the worker
+        
 
     except Exception as e:
         if type(e) is ValueError:
