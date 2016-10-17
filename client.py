@@ -24,7 +24,9 @@ if __name__ == '__main__':
 
         for i in range(6):  # applies the gaussian filter 6 times
             print("Matrix {0} after applying gaussian filter:".format(i))
+            # TODO this will lead to a deadlock we can use a limit of time
             print(result[i].get()) # Gets the result from the worker
+
 
     except Exception as e:
         if type(e) is ValueError:
