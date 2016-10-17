@@ -13,14 +13,18 @@ if __name__ == '__main__':
         size = int(input("Please enter the size for the matrix: "))
         sigma = float(input("Please enter a sigma value: "))
 
-        matrix = genArray(size)
-        print("The matrix to convert is: ")
-        print(matrix)
+        result = []
 
-        result = applyGauss.delay(matrix,sigma) # Puts a new task in the queue
+        for i in range(6):  # applies the gaussian filter 6 times
+            matrix = genArray(size)
+            print("The matrix {0} to convert is: ".format(i))
+            print(matrix)
 
-        print("Matrix after applying gaussian filter:")
-        print(result.get()) # Gets the result from the worker
+            result.append(applyGauss.delay(matrix,sigma)) # Puts a new task in the queue
+
+        for i in range(6):  # applies the gaussian filter 6 times
+            print("Matrix {0} after applying gaussian filter:".format(i))
+            print(result[i].get()) # Gets the result from the worker
 
     except Exception as e:
         if type(e) is ValueError:
