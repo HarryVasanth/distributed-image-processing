@@ -1,3 +1,5 @@
+import sys
+sys.path.append("~/.virtualenvs/venv/lib/python3.4/site-packages")
 import cv2 #THis will import open cv 2
 
 from celery_conf import app
