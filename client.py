@@ -64,3 +64,58 @@ if __name__ == "__main__":
             count += 1
     results = np.array(results)
     imageOpen.saveFile(results)
+
+def algorithmsMenu():
+    """Function to display all available algorithms"""
+    ans=True
+    while ans:
+        print(
+        1. Edge Detection
+        2. Thresholding
+        3. Rotation
+        4. Smooth by Averaging
+        5. Laplacian Derivative
+        9. Exit/Quit
+        )
+        ans=raw_input("What would you like to do? ")
+        if ans=="1":
+          """Request params ? """
+        elif ans=="2":
+          """Request params ? """
+        elif ans=="3":
+          """Request params ? """
+        elif ans=="4":
+          """Request params ? """
+        elif ans=="5":
+          """Request params ? """
+        elif ans=="9":
+          print("\n Goodbye") 
+          ans = None
+        else:
+           print("\n Not a valid choice! Please try again...")
+
+def mainMenu():
+    """ Function to display Main Menu"""
+    ans=True
+    while ans:
+        print(
+        1. Select spliting algorithm
+        2. Define an image folder path
+        3. 
+        4. 
+        5. 
+        9.Exit/Quit
+        )
+        ans=raw_input("What would you like to do? ")
+        if ans=="1":
+          """Execute algorithmsMenu ?   """
+        elif ans=="2":
+          """Request folder path? """
+       
+        elif ans=="9":
+          print("\n Goodbye") 
+          ans = None
+        else:
+           print("\n Not a valid choice! Please try again...")
+
+
