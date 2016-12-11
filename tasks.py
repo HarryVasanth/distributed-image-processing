@@ -39,18 +39,38 @@ def scaling():
 def translation():
     pass
 
-@app.task()
-def rotation():
-    pass
+@app.task() """https://opencv-python-tutroals.readthedocs.io/en/latest/py_tutorials/py_imgproc/py_geometric_transformations/py_geometric_transformations.html"""
+def rotation(image, angle, scale):
+    """
+    OpenCV function that calculates an affine matrix of 2D Rotation
+    :param image: Image path
+    :param angle: Rotation angle in degrees. Positive values mean counter-clockwise rotation (the coordinate origin is assumed to be the top-left corner).
+    :param scale: Isotropic scale factor.
+    :return:
+    """
+    img = cv2.imread(image,0)
+    rows,cols = img.shape
+
+    M = cv2.getRotationMatrix2D((cols/2,rows/2),angle,scale)
+    dst = cv2.warpAffine(img,M,(cols,rows))
+    return dst
+    
 
 @app.task()
 def prespectiveTransformation():
     pass
 
-@app.task()
-def smoothBy_Averaging():
-    pass
+@app.task() """https://opencv-python-tutroals.readthedocs.io/en/latest/py_tutorials/py_imgproc/py_filtering/py_filtering.html """
+def smoothBy_Averaging(image, kernelX, kernelY):
+    blur = cv2.blur(image,(kernelX,kernelY))
+    return blur
 
 @app.task()
 def smoothBy_Blur():
     pass
+
+@app.task() """https://opencv-python-tutroals.readthedocs.io/en/latest/py_tutorials/py_imgproc/py_gradients/py_gradients.html"""
+def laplacianDerivative(image):
+    laplacian = cv2.Laplacian(image,cv2.CV_64F)
+    return laplacian
+
