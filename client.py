@@ -1,7 +1,7 @@
 import cv2 #THis will import open cv 2
 from tkinter import *
 import tasks
-
+import collections
 import numpy as np
 class File():
 
@@ -39,20 +39,28 @@ class File():
         Write the received matrix to a image file on the directory
         :return:
         """
-        image = np.array(image)
         dir="printado.png"
         cv2.imwrite(dir,image)
+
+def checkForNoneResults(results):
+    for result in results:
+        if not isinstance(result,np.ndarray):
+            return True
+    return False
 
 if __name__ == "__main__":
     imageOpen = File("./images/section8-image.png")
     image = imageOpen.openFile()
-    count = 0
     task_ids = []
     results = []
     for chunk in image:
         task_ids.append(tasks.imageThresholding.delay(chunk, 127, 255))
-        count += 1
-    for result in task_ids:
-        result = result.get()
-        results.append(result)
-
+        results.append(None)
+    while checkForNoneResults(results):
+        count = 0
+        for result in task_ids:
+            if result.ready():
+                results[count] = result.get()
+            count += 1
+    results = np.array(results)
+    imageOpen.saveFile(results)
