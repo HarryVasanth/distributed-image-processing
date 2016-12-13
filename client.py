@@ -48,22 +48,6 @@ def checkForNoneResults(results):
             return True
     return False
 
-if __name__ == "__main__":
-    imageOpen = File("./images/section8-image.png")
-    image = imageOpen.openFile()
-    task_ids = []
-    results = []
-    for chunk in image:
-        task_ids.append(tasks.imageThresholding.delay(chunk, 127, 255))
-        results.append(None)
-    while checkForNoneResults(results):
-        count = 0
-        for result in task_ids:
-            if result.ready():
-                results[count] = result.get()
-            count += 1
-    results = np.array(results)
-    imageOpen.saveFile(results)
 """ Function to reuse in algorithm application"""
 def algorithmApplier(algorithm, path, **parameters):
     imageOpen = File(path)
@@ -71,13 +55,15 @@ def algorithmApplier(algorithm, path, **parameters):
     
     task_ids = []
     results = []
+
+    print(parameters)
     for chunk in image:
         if len(parameters) == 0:
             task_ids.append(algorithm.delay(chunk))
         elif len(parameters) == 1:
             task_ids.append(algorithm.delay(chunk,parameters.get("parameter1")))
         elif len(parameters) == 2:
-            task_ids.append(algorithm.delay(chunk,parameters.get("parameter1"),parameters.get("parameter2")))
+            task_ids.append(algorithm.delay(chunk,float(parameters.get("parameter1")),float(parameters.get("parameter2"))))
         elif len(parameters) == 3:
             task_ids.append(algorithm.delay(chunk,parameters.get("parameter1"),parameters.get("parameter2"),parameters.get("parameter3")))
             
@@ -157,14 +143,17 @@ def handleEdgeDetection():
 
 def handleImageThresholding():
      ans=input("Insert Image Path:")
-     image = ans;
+     image = ans
 
      ans2 = input("Insert threshold value:")
-     thresholdValue = ans2;
+     thresholdValue = ans2
 
      ans3 = input("Insert maximum value:")
-     maxVal = ans3;
+     maxVal = ans3
 
+     print(image)
+     print(thresholdValue)
+     print(maxVal)
      algorithmApplier(tasks.imageThresholding, image, parameter1=thresholdValue, parameter2 = maxVal);
      
 
@@ -205,4 +194,21 @@ def handleLaplacianDerivative():
 def imageFolderPath():
      ans=input("Insert Image Folder Path:")
      image = ans;
-    
+
+if __name__ == "__main__":
+    '''imageOpen = File("./images/section8-image.png")
+    image = imageOpen.openFile()
+    task_ids = []
+    results = []
+    for chunk in image:
+        task_ids.append(tasks.imageThresholding.delay(chunk, 127, 255))
+        results.append(None)
+    while checkForNoneResults(results):
+        count = 0
+        for result in task_ids:
+            if result.ready():
+                results[count] = result.get()
+            count += 1
+    results = np.array(results)
+    imageOpen.saveFile(results)'''
+    mainMenu()
