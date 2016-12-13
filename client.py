@@ -79,15 +79,15 @@ def algorithmsMenu():
         )
         ans=raw_input("What would you like to do? ")
         if ans=="1":
-          """Request params ? """
+            handleEdgeDetection()
         elif ans=="2":
-          """Request params ? """
+            handleImageThresholding()
         elif ans=="3":
-          """Request params ? """
+            handleRotation()
         elif ans=="4":
-          """Request params ? """
+            handleSmoothAveraging()
         elif ans=="5":
-          """Request params ? """
+            handleLaplacianDerivative()
         elif ans=="9":
           print("\n Goodbye") 
           ans = None
@@ -108,14 +108,66 @@ def mainMenu():
         )
         ans=raw_input("What would you like to do? ")
         if ans=="1":
-          """Execute algorithmsMenu ?   """
+            algorithmsMenu()
         elif ans=="2":
-          """Request folder path? """
-       
+            imageFolderPath()
         elif ans=="9":
           print("\n Goodbye") 
           ans = None
         else:
            print("\n Not a valid choice! Please try again...")
 
+def handleEdgeDetection():
+     ans=raw_input("Insert Image Path:")
+     image = ans;
 
+     ans2 = raw_input("Insert minimum value:")
+     minVal = ans2;
+
+     ans3 = raw_input("Insert maximum value:")
+     maxVal = ans3;
+     
+
+     
+
+def handleImageThresholding():
+     ans=raw_input("Insert Image Path:")
+     image = ans;
+
+     ans2 = raw_input("Insert threshold value:")
+     thresholdValue = ans2;
+
+     ans3 = raw_input("Insert maximum value:")
+     maxVal = ans3;
+     
+
+def handleRotation():
+     ans=raw_input("Insert Image Path:")
+     image = ans;
+
+     ans2 = raw_input("Insert angle:")
+     angle = ans2;
+
+     ans3 = raw_input("Insert scale:")
+     scale = ans3;
+     
+
+def handleSmoothAveraging():
+     ans=raw_input("Insert Image Path:")
+     image = ans;
+
+     ans2 = raw_input("Insert Kernel's X:")
+     kernelX = ans2;
+
+     ans3 = raw_input("Insert Kernel's Y:")
+     kernelY = ans3;
+     
+
+def handleLaplacianDerivative():
+     ans=raw_input("Insert Image Path:")
+     image = ans;
+
+def imageFolderPath():
+     ans=raw_input("Insert Image Folder Path:")
+     image = ans;
+    
