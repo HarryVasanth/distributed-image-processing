@@ -64,6 +64,33 @@ if __name__ == "__main__":
             count += 1
     results = np.array(results)
     imageOpen.saveFile(results)
+""" Function to reuse in algorithm application"""
+def algorithmApplier(algorithm, path, **parameters):
+    imageOpen = File(path)
+    image = imageOpen.openFile()
+    
+    task_ids = []
+    results = []
+    for chunk in image:
+        if len(parameters) == 0:
+            task_ids.append(tasks.algorithm.delay(chunk))
+        elif len(parameters) == 1:
+            task_ids.append(tasks.algorithm.delay(chunk,parameters.get("parameter1")))
+        elif len(parameters) == 2:
+            task_ids.append(tasks.algorithm.delay(chunk,parameters.get("parameter1"),parameters.get("parameter2")))
+        elif len(parameters) == 3:
+            task_ids.append(tasks.algorithm.delay(chunk,parameters.get("parameter1"),parameters.get("parameter2"),parameters.get("parameter3")))
+            
+        results.append(None)
+    while checkForNoneResults(results):
+        count = 0
+        for result in task_ids:
+            if result.ready():
+                results[count] = result.get()
+            count += 1
+    results = np.array(results)
+    imageOpen.saveFile(results)
+
 
 def algorithmsMenu():
     """Function to display all available algorithms"""
@@ -126,6 +153,8 @@ def handleEdgeDetection():
 
      ans3 = raw_input("Insert maximum value:")
      maxVal = ans3;
+
+     algorithmApplier(edgeDetection, image, parameter1=minVal, parameter2 = maxVal);
      
 
      
@@ -139,6 +168,8 @@ def handleImageThresholding():
 
      ans3 = raw_input("Insert maximum value:")
      maxVal = ans3;
+
+     algorithmApplier(imageThresholding, image, parameter1=thresholdValue, parameter2 = maxVal);
      
 
 def handleRotation():
@@ -150,6 +181,9 @@ def handleRotation():
 
      ans3 = raw_input("Insert scale:")
      scale = ans3;
+
+     algorithmApplier(rotation, image, parameter1=angle, parameter2 = scale);
+     
      
 
 def handleSmoothAveraging():
@@ -161,11 +195,16 @@ def handleSmoothAveraging():
 
      ans3 = raw_input("Insert Kernel's Y:")
      kernelY = ans3;
+
+     algorithmApplier(smoothBy_Averaging, image, parameter1=kernelX, parameter2 = kernelY);
      
 
 def handleLaplacianDerivative():
      ans=raw_input("Insert Image Path:")
      image = ans;
+
+    algorithmApplier(laplacianDerivative, image);
+     
 
 def imageFolderPath():
      ans=raw_input("Insert Image Folder Path:")
