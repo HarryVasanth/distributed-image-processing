@@ -73,13 +73,13 @@ def algorithmApplier(algorithm, path, **parameters):
     results = []
     for chunk in image:
         if len(parameters) == 0:
-            task_ids.append(tasks.algorithm.delay(chunk))
+            task_ids.append(algorithm.delay(chunk))
         elif len(parameters) == 1:
-            task_ids.append(tasks.algorithm.delay(chunk,parameters.get("parameter1")))
+            task_ids.append(algorithm.delay(chunk,parameters.get("parameter1")))
         elif len(parameters) == 2:
-            task_ids.append(tasks.algorithm.delay(chunk,parameters.get("parameter1"),parameters.get("parameter2")))
+            task_ids.append(algorithm.delay(chunk,parameters.get("parameter1"),parameters.get("parameter2")))
         elif len(parameters) == 3:
-            task_ids.append(tasks.algorithm.delay(chunk,parameters.get("parameter1"),parameters.get("parameter2"),parameters.get("parameter3")))
+            task_ids.append(algorithm.delay(chunk,parameters.get("parameter1"),parameters.get("parameter2"),parameters.get("parameter3")))
             
         results.append(None)
     while checkForNoneResults(results):
@@ -96,15 +96,13 @@ def algorithmsMenu():
     """Function to display all available algorithms"""
     ans=True
     while ans:
-        print(
-        1. Edge Detection
-        2. Thresholding
-        3. Rotation
-        4. Smooth by Averaging
-        5. Laplacian Derivative
-        9. Exit/Quit
-        )
-        ans=raw_input("What would you like to do? ")
+        print("1. Edge Detection")
+        print("2. Thresholding")
+        print("3. Rotation")
+        print("4. Smooth by Averaging")
+        print("5. Laplacian Derivative")
+        print("9. Exit/Quit")
+        ans=input("What would you like to do? ")
         if ans=="1":
             handleEdgeDetection()
         elif ans=="2":
@@ -125,15 +123,13 @@ def mainMenu():
     """ Function to display Main Menu"""
     ans=True
     while ans:
-        print(
-        1. Select spliting algorithm
-        2. Define an image folder path
-        3. 
-        4. 
-        5. 
-        9.Exit/Quit
-        )
-        ans=raw_input("What would you like to do? ")
+        print("1. Select spliting algorithm")
+        print("2. Define an image folder path")
+        print("3.")
+        print("4.")
+        print("5.")
+        print("9.Exit/Quit")
+        ans=input("What would you like to do? ")
         if ans=="1":
             algorithmsMenu()
         elif ans=="2":
@@ -145,68 +141,68 @@ def mainMenu():
            print("\n Not a valid choice! Please try again...")
 
 def handleEdgeDetection():
-     ans=raw_input("Insert Image Path:")
+     ans=input("Insert Image Path:")
      image = ans;
 
-     ans2 = raw_input("Insert minimum value:")
+     ans2 = input("Insert minimum value:")
      minVal = ans2;
 
-     ans3 = raw_input("Insert maximum value:")
+     ans3 = input("Insert maximum value:")
      maxVal = ans3;
 
-     algorithmApplier(edgeDetection, image, parameter1=minVal, parameter2 = maxVal);
+     algorithmApplier(tasks.edgeDetection, image, parameter1=minVal, parameter2 = maxVal);
      
 
      
 
 def handleImageThresholding():
-     ans=raw_input("Insert Image Path:")
+     ans=input("Insert Image Path:")
      image = ans;
 
-     ans2 = raw_input("Insert threshold value:")
+     ans2 = input("Insert threshold value:")
      thresholdValue = ans2;
 
-     ans3 = raw_input("Insert maximum value:")
+     ans3 = input("Insert maximum value:")
      maxVal = ans3;
 
-     algorithmApplier(imageThresholding, image, parameter1=thresholdValue, parameter2 = maxVal);
+     algorithmApplier(tasks.imageThresholding, image, parameter1=thresholdValue, parameter2 = maxVal);
      
 
 def handleRotation():
-     ans=raw_input("Insert Image Path:")
+     ans=input("Insert Image Path:")
      image = ans;
 
-     ans2 = raw_input("Insert angle:")
+     ans2 = input("Insert angle:")
      angle = ans2;
 
-     ans3 = raw_input("Insert scale:")
+     ans3 = input("Insert scale:")
      scale = ans3;
 
-     algorithmApplier(rotation, image, parameter1=angle, parameter2 = scale);
+     algorithmApplier(tasks.rotation, image, parameter1=angle, parameter2 = scale);
      
      
 
 def handleSmoothAveraging():
-     ans=raw_input("Insert Image Path:")
+     ans=input("Insert Image Path:")
      image = ans;
 
-     ans2 = raw_input("Insert Kernel's X:")
+     ans2 = input("Insert Kernel's X:")
      kernelX = ans2;
 
-     ans3 = raw_input("Insert Kernel's Y:")
+     ans3 = input("Insert Kernel's Y:")
      kernelY = ans3;
 
-     algorithmApplier(smoothBy_Averaging, image, parameter1=kernelX, parameter2 = kernelY);
+     algorithmApplier(tasks.smoothBy_Averaging, image, parameter1=kernelX, parameter2 = kernelY);
      
 
 def handleLaplacianDerivative():
-     ans=raw_input("Insert Image Path:")
-     image = ans;
+    ans=input("Insert Image Path:")
+    image = ans
 
-    algorithmApplier(laplacianDerivative, image);
+    algorithmApplier(tasks.laplacianDerivative, image);
      
 
 def imageFolderPath():
-     ans=raw_input("Insert Image Folder Path:")
+     ans=input("Insert Image Folder Path:")
      image = ans;
     
