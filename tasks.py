@@ -39,9 +39,10 @@ def scaling():
 def translation():
     pass
 
-@app.task() """https://opencv-python-tutroals.readthedocs.io/en/latest/py_tutorials/py_imgproc/py_geometric_transformations/py_geometric_transformations.html"""
+@app.task()
 def rotation(image, angle, scale):
     """
+    https://opencv-python-tutroals.readthedocs.io/en/latest/py_tutorials/py_imgproc/py_geometric_transformations/py_geometric_transformations.html
     OpenCV function that calculates an affine matrix of 2D Rotation
     :param image: Image path
     :param angle: Rotation angle in degrees. Positive values mean counter-clockwise rotation (the coordinate origin is assumed to be the top-left corner).
@@ -60,8 +61,9 @@ def rotation(image, angle, scale):
 def prespectiveTransformation():
     pass
 
-@app.task() """https://opencv-python-tutroals.readthedocs.io/en/latest/py_tutorials/py_imgproc/py_filtering/py_filtering.html """
+@app.task()
 def smoothBy_Averaging(image, kernelX, kernelY):
+    """https://opencv-python-tutroals.readthedocs.io/en/latest/py_tutorials/py_imgproc/py_filtering/py_filtering.html """
     blur = cv2.blur(image,(kernelX,kernelY))
     return blur
 
@@ -69,8 +71,9 @@ def smoothBy_Averaging(image, kernelX, kernelY):
 def smoothBy_Blur():
     pass
 
-@app.task() """https://opencv-python-tutroals.readthedocs.io/en/latest/py_tutorials/py_imgproc/py_gradients/py_gradients.html"""
+@app.task()
 def laplacianDerivative(image):
+    """https://opencv-python-tutroals.readthedocs.io/en/latest/py_tutorials/py_imgproc/py_gradients/py_gradients.html"""
     laplacian = cv2.Laplacian(image,cv2.CV_64F)
     return laplacian
 
