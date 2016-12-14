@@ -3,6 +3,7 @@ from tkinter import *
 import tasks
 import collections
 import numpy as np
+imageFolderPath = ''
 class File():
 
     def __init__(self,path):
@@ -61,11 +62,11 @@ def algorithmApplier(algorithm, path, **parameters):
         if len(parameters) == 0:
             task_ids.append(algorithm.delay(chunk))
         elif len(parameters) == 1:
-            task_ids.append(algorithm.delay(chunk,parameters.get("parameter1")))
+            task_ids.append(algorithm.delay(chunk,float(parameters.get("parameter1"))))
         elif len(parameters) == 2:
             task_ids.append(algorithm.delay(chunk,float(parameters.get("parameter1")),float(parameters.get("parameter2"))))
         elif len(parameters) == 3:
-            task_ids.append(algorithm.delay(chunk,parameters.get("parameter1"),parameters.get("parameter2"),parameters.get("parameter3")))
+            task_ids.append(algorithm.delay(chunk,float(parameters.get("parameter1")),float(parameters.get("parameter2")),float(parameters.get("parameter3")))
             
         results.append(None)
     while checkForNoneResults(results):
@@ -128,15 +129,15 @@ def mainMenu():
 
 def handleEdgeDetection():
      ans=input("Insert Image Path:")
-     image = ans;
+     image = ans
 
      ans2 = input("Insert minimum value:")
-     minVal = ans2;
+     minVal = ans2
 
      ans3 = input("Insert maximum value:")
-     maxVal = ans3;
+     maxVal = ans3
 
-     algorithmApplier(tasks.edgeDetection, image, parameter1=minVal, parameter2 = maxVal);
+     algorithmApplier(tasks.edgeDetection, image, parameter1=minVal, parameter2 = maxVal)
      
 
      
@@ -154,46 +155,59 @@ def handleImageThresholding():
      print(image)
      print(thresholdValue)
      print(maxVal)
-     algorithmApplier(tasks.imageThresholding, image, parameter1=thresholdValue, parameter2 = maxVal);
+     algorithmApplier(tasks.imageThresholding, image, parameter1=thresholdValue, parameter2 = maxVal)
      
 
 def handleRotation():
      ans=input("Insert Image Path:")
-     image = ans;
+     image = ans
 
      ans2 = input("Insert angle:")
-     angle = ans2;
+     angle = ans2
 
      ans3 = input("Insert scale:")
-     scale = ans3;
+     scale = ans3
 
-     algorithmApplier(tasks.rotation, image, parameter1=angle, parameter2 = scale);
+     algorithmApplier(tasks.rotation, image, parameter1=angle, parameter2 = scale)
      
      
 
 def handleSmoothAveraging():
      ans=input("Insert Image Path:")
-     image = ans;
+     image = ans
 
      ans2 = input("Insert Kernel's X:")
-     kernelX = ans2;
+     kernelX = ans2
 
      ans3 = input("Insert Kernel's Y:")
-     kernelY = ans3;
+     kernelY = ans3
 
-     algorithmApplier(tasks.smoothBy_Averaging, image, parameter1=kernelX, parameter2 = kernelY);
+     algorithmApplier(tasks.smoothBy_Averaging, image, parameter1=kernelX, parameter2 = kernelY)
      
 
 def handleLaplacianDerivative():
     ans=input("Insert Image Path:")
     image = ans
 
-    algorithmApplier(tasks.laplacianDerivative, image);
+    algorithmApplier(tasks.laplacianDerivative, image)
      
 
 def imageFolderPath():
      ans=input("Insert Image Folder Path:")
-     image = ans;
+     image = ans
+
+     global imageFolderPath = image;
+    """  Found something useful for iteratin through the image, we can implement it tomorrow together:
+
+
+http://stackoverflow.com/questions/10377998/how-can-i-iterate-over-files-in-a-given-directory
+
+
+imageOpen = File("./images/x.png")
+    image = imageOpen.openFile()
+    res = tasks.edgeDetection.delay(image, 100, 200)
+    result = np.array(res.get())
+    imageOpen.saveFile(result)"""
 
 if __name__ == "__main__":
     '''imageOpen = File("./images/section8-image.png")
