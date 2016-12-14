@@ -48,90 +48,6 @@ class File():
         cv2.imwrite(dir, image)
 
 
-class Algorithms():
-    """
-    Implements all the algorithms for image processing
-    """
-    def handleEdgeDetection(self):
-        """
-        Ask for parameters for edge detection
-        :return:
-        """
-        ans = input("Insert Image Path:")
-        image = ans
-
-        ans2 = input("Insert minimum value:")
-        minVal = ans2
-
-        ans3 = input("Insert maximum value:")
-        maxVal = ans3
-
-        algorithmApplier(tasks.edgeDetection, image, parameter1=minVal, parameter2=maxVal)
-
-    def handleImageThresholding(self):
-        """
-        Ask for parameters for Image Thresholding
-        :return:
-        """
-        ans = input("Insert Image Path:")
-        image = ans
-
-        ans2 = input("Insert threshold value:")
-        thresholdValue = ans2
-
-        ans3 = input("Insert maximum value:")
-        maxVal = ans3
-
-        #print(image)
-        #print(thresholdValue)
-        #print(maxVal)
-        algorithmApplier(tasks.imageThresholding, image, parameter1=thresholdValue, parameter2=maxVal)
-
-    def handleRotation(self):
-        """
-        Asks for parameters for image rotation
-        :return:
-        """
-        ans = input("Insert Image Path:")
-        image = ans
-
-        ans2 = input("Insert angle:")
-        angle = ans2
-
-        ans3 = input("Insert scale:")
-        scale = ans3
-
-        algorithmApplier(tasks.rotation, image, parameter1=angle, parameter2=scale)
-
-    def handleSmoothAveraging(self):
-        """
-        Asks for image smoothing parameters
-        :return:
-        """
-        ans = input("Insert Image Path:")
-        image = ans
-
-        ans2 = input("Insert Kernel's X:")
-        kernelX = ans2
-
-        ans3 = input("Insert Kernel's Y:")
-        kernelY = ans3
-
-        algorithmApplier(tasks.smoothBy_Averaging, image, parameter1=kernelX, parameter2=kernelY)
-
-    def handleLaplacianDerivative(self):
-        """
-        Asks for the path where is the image that will be processed
-        :return:
-        """
-        ans = input("Insert Image Path:")
-        image = ans
-
-        algorithmApplier(tasks.laplacianDerivative, image)
-
-
-
-
 def checkForNoneResults(results):
     for result in results:
         if not isinstance(result, np.ndarray):
@@ -173,36 +89,6 @@ def algorithmApplier(algorithm, path, **parameters):
     results = np.array(results)
     imageOpen.saveFile(results)
 
-
-def algorithmsMenu():
-    """Function to display all available algorithms"""
-    ans = True
-    algorithms = Algorithms()
-    while ans:
-        print("1. Edge Detection")
-        print("2. Thresholding")
-        print("3. Rotation")
-        print("4. Smooth by Averaging")
-        print("5. Laplacian Derivative")
-        print("9. Exit/Quit")
-        ans = input("What would you like to do? ")
-        if ans == "1":
-            algorithms.handleEdgeDetection()
-        elif ans == "2":
-            algorithms.handleImageThresholding()
-        elif ans == "3":
-            algorithms.handleRotation()
-        elif ans == "4":
-            algorithms.handleSmoothAveraging()
-        elif ans == "5":
-            algorithms.handleLaplacianDerivative()
-        elif ans == "9":
-            print("\n Goodbye")
-            ans = None
-        else:
-            print("\n Not a valid choice! Please try again...")
-
-
 def mainMenu():
     """ Function to display Main Menu"""
     ans = True
@@ -212,16 +98,23 @@ def mainMenu():
         print("9.Exit/Quit")
         ans = input("What would you like to do? ")
         if ans == "1":
-            algorithmsMenu()
+            par1, par2, function = algorithmsMenu()
+            singleImage(function,par1,par2)
         elif ans == "2":
-            imageFolderPath()
+            par1, par2, function = algorithmsMenu()
+            multiImage(function, par1, par2)
         elif ans == "9":
             print("\n Goodbye")
             ans = None
         else:
             print("\n Not a valid choice! Please try again...")
 
-def algorithmsMenuForImages():
+
+def algorithmsMenu():
+    """
+    Selection Menu - Front End Isolation
+    :return:
+    """
     ans = True
     while ans:
         print("1. Edge Detection")
@@ -235,7 +128,7 @@ def algorithmsMenuForImages():
             ans2 = input("Insert minimum value:")
             ans3 = input("Insert maximum value:")
             function = tasks.edgeDetection
-            return  ans2, ans3, function
+            return ans2, ans3, function
         elif ans == "2":
             ans2 = input("Insert threshold value:")
             ans3 = input("Insert maximum value:")
@@ -262,21 +155,35 @@ def algorithmsMenuForImages():
             print("\n Not a valid choice! Please try again...")
 
 
-def imageFolderPath():
-    imagePath = input("Insert Image Folder Path:")
-    #Making the path an absolute one
-    fullPathToImage = os.path.abspath(imagePath)
-
-    #Show the Menu
-    par1, par2, function = algorithmsMenuForImages()
-
+def singleImage(function, par1, par2):
+    """
+    Single image algorithm calls
+    :param function:
+    :param par1:
+    :param par2:
+    :return:
+    """
     if par1 is None and par2 is None and function is None:
         return
     else:
+        imagePath = input("Insert Image Path:")
+        algorithmApplier(function, imagePath, True, parameter1=par1, parameter2=par2)
+
+def multiImage(function,par1,par2):
+    """
+    Multiple image algorithm processing
+    :return:
+    """
+    if par1 is None and par2 is None and function is None:
+        return
+    else:
+        imagePath = input("Insert Image Folder Path:")
+        # Making the path an absolute one
+        fullPathToImage = os.path.abspath(imagePath)
         try:
             for filename in os.listdir(fullPathToImage):
                 if filename.endswith(".png") or filename.endswith(".jpg"):
-                        algorithmApplier(function, fullPathToImage + "/" + filename, parameter1=par1, parameter2=par2)
+                    algorithmApplier(function, fullPathToImage + "/" + filename, True, parameter1=par1, parameter2=par2)
                 else:
                     print("Can't use this file")
         except FileNotFoundError:
@@ -286,19 +193,4 @@ def imageFolderPath():
 
 
 if __name__ == "__main__":
-    '''imageOpen = File("./images/section8-image.png")
-    image = imageOpen.openFile()
-    task_ids = []
-    results = []
-    for chunk in image:
-        task_ids.append(tasks.imageThresholding.delay(chunk, 127, 255))
-        results.append(None)
-    while checkForNoneResults(results):
-        count = 0
-        for result in task_ids:
-            if result.ready():
-                results[count] = result.get()
-            count += 1
-    results = np.array(results)
-    imageOpen.saveFile(results)'''
     mainMenu()
