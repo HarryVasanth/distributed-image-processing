@@ -1,12 +1,17 @@
-import cv2 #THis will import open cv 2
+import os
+import cv2  # THis will import open cv 2
 from tkinter import *
 import tasks
 import collections
 import numpy as np
-imageFolderPath = ''
-class File():
 
-    def __init__(self,path):
+
+class File():
+    """
+    Implements all file operation Open Close and Save Files
+    """
+
+    def __init__(self, path):
         self.path = path
 
     def openFile(self):
@@ -18,13 +23,12 @@ class File():
             0 = cv2.IMREAD_GRAYSCALE : Loads image in grayscale mode
             1 = cv2.IMREAD_UNCHANGED : Loads image as such including alpha channel
         """
-        self.im = cv2.imread(self.path,cv2.IMREAD_GRAYSCALE)
+        self.im = cv2.imread(self.path, cv2.IMREAD_GRAYSCALE)
         if self.im == None or self.im.size == 0:
             print('Image loaded is empty')
             sys.exit(1)
         else:
             return self.im;
-
 
     def showFile(self):
         """
@@ -35,25 +39,113 @@ class File():
         cv2.waitKey(0)
         cv2.destroyAllWindows()
 
-    def saveFile(self,image):
+    def saveFile(self, image):
         """
         Write the received matrix to a image file on the directory
         :return:
         """
-        dir="printado.png"
-        cv2.imwrite(dir,image)
+        dir = "printado.png"
+        cv2.imwrite(dir, image)
+
+
+class Algorithms():
+    """
+    Implements all the algorithms for image processing
+    """
+    def handleEdgeDetection(self):
+        """
+        Ask for parameters for edge detection
+        :return:
+        """
+        ans = input("Insert Image Path:")
+        image = ans
+
+        ans2 = input("Insert minimum value:")
+        minVal = ans2
+
+        ans3 = input("Insert maximum value:")
+        maxVal = ans3
+
+        algorithmApplier(tasks.edgeDetection, image, parameter1=minVal, parameter2=maxVal)
+
+    def handleImageThresholding(self):
+        """
+        Ask for parameters for Image Thresholding
+        :return:
+        """
+        ans = input("Insert Image Path:")
+        image = ans
+
+        ans2 = input("Insert threshold value:")
+        thresholdValue = ans2
+
+        ans3 = input("Insert maximum value:")
+        maxVal = ans3
+
+        #print(image)
+        #print(thresholdValue)
+        #print(maxVal)
+        algorithmApplier(tasks.imageThresholding, image, parameter1=thresholdValue, parameter2=maxVal)
+
+    def handleRotation(self):
+        """
+        Asks for parameters for image rotation
+        :return:
+        """
+        ans = input("Insert Image Path:")
+        image = ans
+
+        ans2 = input("Insert angle:")
+        angle = ans2
+
+        ans3 = input("Insert scale:")
+        scale = ans3
+
+        algorithmApplier(tasks.rotation, image, parameter1=angle, parameter2=scale)
+
+    def handleSmoothAveraging(self):
+        """
+        Asks for image smoothing parameters
+        :return:
+        """
+        ans = input("Insert Image Path:")
+        image = ans
+
+        ans2 = input("Insert Kernel's X:")
+        kernelX = ans2
+
+        ans3 = input("Insert Kernel's Y:")
+        kernelY = ans3
+
+        algorithmApplier(tasks.smoothBy_Averaging, image, parameter1=kernelX, parameter2=kernelY)
+
+    def handleLaplacianDerivative(self):
+        """
+        Asks for the path where is the image that will be processed
+        :return:
+        """
+        ans = input("Insert Image Path:")
+        image = ans
+
+        algorithmApplier(tasks.laplacianDerivative, image)
+
+
+
 
 def checkForNoneResults(results):
     for result in results:
-        if not isinstance(result,np.ndarray):
+        if not isinstance(result, np.ndarray):
             return True
     return False
 
+
 """ Function to reuse in algorithm application"""
+
+
 def algorithmApplier(algorithm, path, **parameters):
     imageOpen = File(path)
     image = imageOpen.openFile()
-    
+
     task_ids = []
     results = []
 
@@ -62,12 +154,15 @@ def algorithmApplier(algorithm, path, **parameters):
         if len(parameters) == 0:
             task_ids.append(algorithm.delay(chunk))
         elif len(parameters) == 1:
-            task_ids.append(algorithm.delay(chunk,float(parameters.get("parameter1"))))
+            task_ids.append(algorithm.delay(chunk, float(parameters.get("parameter1"))))
         elif len(parameters) == 2:
-            task_ids.append(algorithm.delay(chunk,float(parameters.get("parameter1")),float(parameters.get("parameter2"))))
+            task_ids.append(
+                algorithm.delay(chunk, float(parameters.get("parameter1")), float(parameters.get("parameter2"))))
         elif len(parameters) == 3:
-            task_ids.append(algorithm.delay(chunk,float(parameters.get("parameter1")),float(parameters.get("parameter2")),float(parameters.get("parameter3")))
-            
+            task_ids.append(
+                algorithm.delay(chunk, float(parameters.get("parameter1")), float(parameters.get("parameter2")),
+                                float(parameters.get("parameter3"))))
+
         results.append(None)
     while checkForNoneResults(results):
         count = 0
@@ -81,7 +176,8 @@ def algorithmApplier(algorithm, path, **parameters):
 
 def algorithmsMenu():
     """Function to display all available algorithms"""
-    ans=True
+    ans = True
+    algorithms = Algorithms()
     while ans:
         print("1. Edge Detection")
         print("2. Thresholding")
@@ -89,125 +185,105 @@ def algorithmsMenu():
         print("4. Smooth by Averaging")
         print("5. Laplacian Derivative")
         print("9. Exit/Quit")
-        ans=input("What would you like to do? ")
-        if ans=="1":
-            handleEdgeDetection()
-        elif ans=="2":
-            handleImageThresholding()
-        elif ans=="3":
-            handleRotation()
-        elif ans=="4":
-            handleSmoothAveraging()
-        elif ans=="5":
-            handleLaplacianDerivative()
-        elif ans=="9":
-          print("\n Goodbye") 
-          ans = None
+        ans = input("What would you like to do? ")
+        if ans == "1":
+            algorithms.handleEdgeDetection()
+        elif ans == "2":
+            algorithms.handleImageThresholding()
+        elif ans == "3":
+            algorithms.handleRotation()
+        elif ans == "4":
+            algorithms.handleSmoothAveraging()
+        elif ans == "5":
+            algorithms.handleLaplacianDerivative()
+        elif ans == "9":
+            print("\n Goodbye")
+            ans = None
         else:
-           print("\n Not a valid choice! Please try again...")
+            print("\n Not a valid choice! Please try again...")
+
 
 def mainMenu():
     """ Function to display Main Menu"""
-    ans=True
+    ans = True
     while ans:
         print("1. Select spliting algorithm")
         print("2. Define an image folder path")
-        print("3.")
-        print("4.")
-        print("5.")
         print("9.Exit/Quit")
-        ans=input("What would you like to do? ")
-        if ans=="1":
+        ans = input("What would you like to do? ")
+        if ans == "1":
             algorithmsMenu()
-        elif ans=="2":
+        elif ans == "2":
             imageFolderPath()
-        elif ans=="9":
-          print("\n Goodbye") 
-          ans = None
+        elif ans == "9":
+            print("\n Goodbye")
+            ans = None
         else:
-           print("\n Not a valid choice! Please try again...")
+            print("\n Not a valid choice! Please try again...")
 
-def handleEdgeDetection():
-     ans=input("Insert Image Path:")
-     image = ans
+def algorithmsMenuForImages():
+    ans = True
+    while ans:
+        print("1. Edge Detection")
+        print("2. Thresholding")
+        print("3. Rotation")
+        print("4. Smooth by Averaging")
+        print("5. Laplacian Derivative")
+        print("9. Exit/Quit")
+        ans = input("What would you like to do? ")
+        if ans == "1":
+            ans2 = input("Insert minimum value:")
+            ans3 = input("Insert maximum value:")
+            function = tasks.edgeDetection
+            return  ans2, ans3, function
+        elif ans == "2":
+            ans2 = input("Insert threshold value:")
+            ans3 = input("Insert maximum value:")
+            function = tasks.imageThresholding
+            return ans2, ans3, function
+        elif ans == "3":
+            ans2 = input("Insert angle:")
+            ans3 = input("Insert scale:")
+            function = tasks.rotation
+            return ans2, ans3, function
+        elif ans == "4":
+            ans2 = input("Insert Kernel's X:")
+            ans3 = input("Insert Kernel's Y:")
+            function = tasks.smoothBy_Averaging
+            return ans2, ans3, function
+        elif ans == "5":
+            function = tasks.laplacianDerivative
+            return None, None, function
+        elif ans == "9":
+            print("\n Goodbye")
+            ans = None
+            return None, None, None
+        else:
+            print("\n Not a valid choice! Please try again...")
 
-     ans2 = input("Insert minimum value:")
-     minVal = ans2
-
-     ans3 = input("Insert maximum value:")
-     maxVal = ans3
-
-     algorithmApplier(tasks.edgeDetection, image, parameter1=minVal, parameter2 = maxVal)
-     
-
-     
-
-def handleImageThresholding():
-     ans=input("Insert Image Path:")
-     image = ans
-
-     ans2 = input("Insert threshold value:")
-     thresholdValue = ans2
-
-     ans3 = input("Insert maximum value:")
-     maxVal = ans3
-
-     print(image)
-     print(thresholdValue)
-     print(maxVal)
-     algorithmApplier(tasks.imageThresholding, image, parameter1=thresholdValue, parameter2 = maxVal)
-     
-
-def handleRotation():
-     ans=input("Insert Image Path:")
-     image = ans
-
-     ans2 = input("Insert angle:")
-     angle = ans2
-
-     ans3 = input("Insert scale:")
-     scale = ans3
-
-     algorithmApplier(tasks.rotation, image, parameter1=angle, parameter2 = scale)
-     
-     
-
-def handleSmoothAveraging():
-     ans=input("Insert Image Path:")
-     image = ans
-
-     ans2 = input("Insert Kernel's X:")
-     kernelX = ans2
-
-     ans3 = input("Insert Kernel's Y:")
-     kernelY = ans3
-
-     algorithmApplier(tasks.smoothBy_Averaging, image, parameter1=kernelX, parameter2 = kernelY)
-     
-
-def handleLaplacianDerivative():
-    ans=input("Insert Image Path:")
-    image = ans
-
-    algorithmApplier(tasks.laplacianDerivative, image)
-     
 
 def imageFolderPath():
-     ans=input("Insert Image Folder Path:")
-     image = ans
+    imagePath = input("Insert Image Folder Path:")
+    #Making the path an absolute one
+    fullPathToImage = os.path.abspath(imagePath)
 
-     global imageFolderPath = image;
-    """  Found something useful for iteratin through the image, we can implement it tomorrow together:
+    #Show the Menu
+    par1, par2, function = algorithmsMenuForImages()
 
+    if par1 is None and par2 is None and function is None:
+        return
+    else:
+        try:
+            for filename in os.listdir(fullPathToImage):
+                if filename.endswith(".png") or filename.endswith(".jpg"):
+                        algorithmApplier(function, fullPathToImage + "/" + filename, parameter1=par1, parameter2=par2)
+                else:
+                    print("Can't use this file")
+        except FileNotFoundError:
+            print("Check if you entered the right path")
 
-http://stackoverflow.com/questions/10377998/how-can-i-iterate-over-files-in-a-given-directory
+    print("The Image Processing has finished")
 
-
-imageOpen = File("./images/x.png")
-    image = imageOpen.openFile()
-    res = tasks.edgeDetection.delay(image, 100, 200)
-    result = np.array(res.get())
-    imageOpen.saveFile(result)"""
 
 if __name__ == "__main__":
     '''imageOpen = File("./images/section8-image.png")
