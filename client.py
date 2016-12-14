@@ -4,6 +4,7 @@ from tkinter import *
 import tasks
 import collections
 import numpy as np
+import pandas as pd
 
 
 class File():
@@ -130,48 +131,76 @@ class Algorithms():
         algorithmApplier(tasks.laplacianDerivative, image)
 
 
+class Handler:
+
+    task_ids = {}
+    results = {}
 
 
-def checkForNoneResults(results):
-    for result in results:
-        if not isinstance(result, np.ndarray):
-            return True
-    return False
+    def checkForNoneResults(self, results):
+        for result in results:
+            if not isinstance(result, np.ndarray):
+                return True
+        return False
 
-
-""" Function to reuse in algorithm application"""
-
-
-def algorithmApplier(algorithm, path, **parameters):
-    imageOpen = File(path)
-    image = imageOpen.openFile()
-
-    task_ids = []
-    results = []
-
-    print(parameters)
-    for chunk in image:
-        if len(parameters) == 0:
-            task_ids.append(algorithm.delay(chunk))
-        elif len(parameters) == 1:
-            task_ids.append(algorithm.delay(chunk, float(parameters.get("parameter1"))))
-        elif len(parameters) == 2:
-            task_ids.append(
-                algorithm.delay(chunk, float(parameters.get("parameter1")), float(parameters.get("parameter2"))))
-        elif len(parameters) == 3:
-            task_ids.append(
-                algorithm.delay(chunk, float(parameters.get("parameter1")), float(parameters.get("parameter2")),
-                                float(parameters.get("parameter3"))))
-
-        results.append(None)
-    while checkForNoneResults(results):
+    def splitAndSend (self, image, path,algorithm, parameters):
         count = 0
-        for result in task_ids:
-            if result.ready():
-                results[count] = result.get()
-            count += 1
-    results = np.array(results)
-    imageOpen.saveFile(results)
+        for chunk in image:
+            if len(parameters) == 0:
+                self.task_ids[path+"count"] = algorithm.delay(chunk)
+            elif len(parameters) == 1:
+                self.task_ids[path+"count"] = algorithm.delay(chunk, float(parameters.get("parameter1")))
+            elif len(parameters) == 2:
+                self.task_ids[path+"count"] = \
+                    algorithm.delay(chunk, float(parameters.get("parameter1")), float(parameters.get("parameter2")))
+            elif len(parameters) == 3:
+                self.task_ids[path+"count"] = \
+                    algorithm.delay(chunk, float(parameters.get("parameter1")), float(parameters.get("parameter2")),
+                                    float(parameters.get("parameter3")))
+            self.results.append(None)
+            count = count + 1
+
+    def applyToCompleteImage(self, image, path, algorithm, parameters):
+        if len(parameters) == 0:
+            self.task_ids[path] = algorithm.delay(image)
+        elif len(parameters) == 1:
+            self.task_ids[path] = algorithm.delay(image, float(parameters.get("parameter1")))
+        elif len(parameters) == 2:
+            self.task_ids[path] = \
+                algorithm.delay(image, float(parameters.get("parameter1")), float(parameters.get("parameter2")))
+        elif len(parameters) == 3:
+            self.task_ids[path] = \
+                algorithm.delay(image, float(parameters.get("parameter1")), float(parameters.get("parameter2")),
+                                float(parameters.get("parameter3")))
+
+    def checkProcessingState(self):
+        while self.checkForNoneResults(self.results):
+            for key, result in self.task_ids:
+                if result.ready():
+                    self.results[key] = result.get()
+
+    def getSplitResults(self, imageOpen):
+        self.checkProcessingState()
+        self.results = np.array(pd.Series(self.results).values)
+        imageOpen.saveFile(self.results)
+
+    def getFolderResults(self, imageOpen):
+        self.checkProcessingState()
+        for key, result in self.results:
+            result = np.array(result)
+            imageOpen.saveFile(key, result)
+
+    """ Function to reuse in algorithm application"""
+    def algorithmApplier(self, algorithm, path, folder, **parameters):
+        imageOpen = File(path)
+        image = imageOpen.openFile()
+
+        if (folder):
+            self.applyToCompleteImage(image,path,algorithm,parameters)
+        else:
+            self.splitAndSend(image,path,algorithm,parameters)
+            self.getSplitResults(imageOpen)
+
 
 
 def algorithmsMenu():
