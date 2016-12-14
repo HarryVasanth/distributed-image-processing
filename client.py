@@ -167,7 +167,7 @@ def singleImage(function, par1, par2):
         return
     else:
         imagePath = input("Insert Image Path:")
-        algorithmApplier(function, imagePath, True, parameter1=par1, parameter2=par2)
+        algorithmApplier(function, imagePath, False, parameter1=par1, parameter2=par2)
 
 def multiImage(function,par1,par2):
     """
