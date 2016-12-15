@@ -49,11 +49,11 @@ def rotation(image, angle, scale):
     :param scale: Isotropic scale factor.
     :return:
     """
-    img = cv2.imread(image,0)
-    rows,cols = img.shape
+    #img = cv2.imread(image,0)
+    rows,cols = image.shape
 
     M = cv2.getRotationMatrix2D((cols/2,rows/2),angle,scale)
-    dst = cv2.warpAffine(img,M,(cols,rows))
+    dst = cv2.warpAffine(image,M,(cols,rows))
     return dst
     
 
