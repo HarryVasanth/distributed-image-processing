@@ -3,8 +3,9 @@ import cv2  # THis will import open cv 2
 from tkinter import *
 import tasks
 import collections
+import csv
 import numpy as np
-import pandas as pd
+import time
 
 
 class File():
@@ -15,7 +16,7 @@ class File():
     def __init__(self, path):
         self.path = path
 
-    def openFile(self):
+    def openFile(self, loadType):
         """
         This method will open the image
         The path for the image comes when a new object is constructed.
@@ -24,7 +25,7 @@ class File():
             0 = cv2.IMREAD_GRAYSCALE : Loads image in grayscale mode
             1 = cv2.IMREAD_UNCHANGED : Loads image as such including alpha channel
         """
-        self.im = cv2.imread(self.path, cv2.IMREAD_GRAYSCALE)
+        self.im = cv2.imread(self.path, loadType)
         if self.im == None or self.im.size == 0:
             print('Image loaded is empty')
             sys.exit(1)
@@ -40,120 +41,44 @@ class File():
         cv2.waitKey(0)
         cv2.destroyAllWindows()
 
-    def saveFile(self, image):
+    def saveFile(self, image, dir):
         """
         Write the received matrix to a image file on the directory
         :return:
         """
-        dir = "printado.png"
+        path = os.path.split(dir)[0]
+        fileName = os.path.splitext(os.path.split(dir)[1])[0]
+        extension = os.path.splitext(dir)[1]
+        dir = path+"/results/"+fileName+"_processed"+extension
         cv2.imwrite(dir, image)
 
+class Handler:
 
-class Algorithms():
-    """
-    Implements all the algorithms for image processing
-    """
-    def handleEdgeDetection(self):
-        """
-        Ask for parameters for edge detection
-        :return:
-        """
-        ans = input("Insert Image Path:")
-        image = ans
-
-        ans2 = input("Insert minimum value:")
-        minVal = ans2
-
-        ans3 = input("Insert maximum value:")
-        maxVal = ans3
-
-        algorithmApplier(tasks.edgeDetection, image, parameter1=minVal, parameter2=maxVal)
-
-    def handleImageThresholding(self):
-        """
-        Ask for parameters for Image Thresholding
-        :return:
-        """
-        ans = input("Insert Image Path:")
-        image = ans
-
-        ans2 = input("Insert threshold value:")
-        thresholdValue = ans2
-
-        ans3 = input("Insert maximum value:")
-        maxVal = ans3
-
-        #print(image)
-        #print(thresholdValue)
-        #print(maxVal)
-        algorithmApplier(tasks.imageThresholding, image, parameter1=thresholdValue, parameter2=maxVal)
-
-    def handleRotation(self):
-        """
-        Asks for parameters for image rotation
-        :return:
-        """
-        ans = input("Insert Image Path:")
-        image = ans
-
-        ans2 = input("Insert angle:")
-        angle = ans2
-
-        ans3 = input("Insert scale:")
-        scale = ans3
-
-        algorithmApplier(tasks.rotation, image, parameter1=angle, parameter2=scale)
-
-    def handleSmoothAveraging(self):
-        """
-        Asks for image smoothing parameters
-        :return:
-        """
-        ans = input("Insert Image Path:")
-        image = ans
-
-        ans2 = input("Insert Kernel's X:")
-        kernelX = ans2
-
-        ans3 = input("Insert Kernel's Y:")
-        kernelY = ans3
-
-        algorithmApplier(tasks.smoothBy_Averaging, image, parameter1=kernelX, parameter2=kernelY)
-
-    def handleLaplacianDerivative(self):
-        """
-        Asks for the path where is the image that will be processed
-        :return:
-        """
-        ans = input("Insert Image Path:")
-        image = ans
-
-        algorithmApplier(tasks.laplacianDerivative, image)
+    task_ids = {}
+    results = {}
 
 
-
-
-def checkForNoneResults(results):
-    for result in results:
-        if not isinstance(result, np.ndarray):
-            return True
-    return False
+    def checkForNoneResults(self, results):
+        for key, result in results.items():
+            if not isinstance(result, np.ndarray):
+                return True
+        return False
 
     def splitAndSend (self, image, path,algorithm, parameters):
         count = 0
         for chunk in image:
             if len(parameters) == 0:
-                self.task_ids[path+"count"] = algorithm.delay(chunk)
+                self.task_ids[count] = algorithm.delay(chunk)
             elif len(parameters) == 1:
-                self.task_ids[path+"count"] = algorithm.delay(chunk, float(parameters.get("parameter1")))
+                self.task_ids[count] = algorithm.delay(chunk, float(parameters.get("parameter1")))
             elif len(parameters) == 2:
-                self.task_ids[path+"count"] = \
+                self.task_ids[count] = \
                     algorithm.delay(chunk, float(parameters.get("parameter1")), float(parameters.get("parameter2")))
             elif len(parameters) == 3:
-                self.task_ids[path+"count"] = \
+                self.task_ids[count] = \
                     algorithm.delay(chunk, float(parameters.get("parameter1")), float(parameters.get("parameter2")),
                                     float(parameters.get("parameter3")))
-            self.results.append(None)
+            self.results[count] = None
             count = count + 1
 
     def applyToCompleteImage(self, image, path, algorithm, parameters):
@@ -168,35 +93,35 @@ def checkForNoneResults(results):
             self.task_ids[path] = \
                 algorithm.delay(image, float(parameters.get("parameter1")), float(parameters.get("parameter2")),
                                 float(parameters.get("parameter3")))
+        self.results[path] = None
 
     def checkProcessingState(self):
         while self.checkForNoneResults(self.results):
-            for key, result in self.task_ids:
+            for key, result in self.task_ids.items():
                 if result.ready():
                     self.results[key] = result.get()
 
-    def getSplitResults(self, imageOpen):
+    def getSplitResults(self, imageOpen, path):
         self.checkProcessingState()
-        self.results = np.array(pd.Series(self.results).values)
-        imageOpen.saveFile(self.results)
+        self.results = np.array([value for (key, value) in sorted(self.results.items())])
+        imageOpen.saveFile(self.results, path)
 
     def getFolderResults(self, imageOpen):
         self.checkProcessingState()
-        for key, result in self.results:
+        for key, result in self.results.items():
             result = np.array(result)
-            imageOpen.saveFile(key, result)
+            imageOpen.saveFile(result, key)
 
     """ Function to reuse in algorithm application"""
-    def algorithmApplier(self, algorithm, path, folder, **parameters):
+    def algorithmApplier(self, algorithm, path, folder,loadType = 0, **parameters):
         imageOpen = File(path)
-        image = imageOpen.openFile()
+        image = imageOpen.openFile(loadType)
 
         if (folder):
             self.applyToCompleteImage(image,path,algorithm,parameters)
         else:
             self.splitAndSend(image,path,algorithm,parameters)
-            self.getSplitResults(imageOpen)
-
+            self.getSplitResults(imageOpen,path)
 
 def mainMenu():
     """ Function to display Main Menu"""
@@ -207,11 +132,13 @@ def mainMenu():
         print("9.Exit/Quit")
         ans = input("What would you like to do? ")
         if ans == "1":
-            par1, par2, function = algorithmsMenu()
-            singleImage(function,par1,par2)
+            imageType = 0
+            par1, par2, function, loadType = algorithmsMenu(imageType)
+            singleImage(function,par1,par2, loadType)
         elif ans == "2":
-            par1, par2, function = algorithmsMenu()
-            multiImage(function, par1, par2)
+            imageType = 1
+            par1, par2, function, loadType = algorithmsMenu(imageType)
+            multiImage(function, par1, par2, loadType)
         elif ans == "9":
             print("\n Goodbye")
             ans = None
@@ -219,52 +146,89 @@ def mainMenu():
             print("\n Not a valid choice! Please try again...")
 
 
-def algorithmsMenu():
+def algorithmsMenu(imageType):
     """
     Selection Menu - Front End Isolation
     :return:
     """
     ans = True
     while ans:
-        print("1. Edge Detection")
-        print("2. Thresholding")
-        print("3. Rotation")
-        print("4. Smooth by Averaging")
-        print("5. Laplacian Derivative")
-        print("9. Exit/Quit")
-        ans = input("What would you like to do? ")
-        if ans == "1":
-            ans2 = input("Insert minimum value:")
-            ans3 = input("Insert maximum value:")
-            function = tasks.edgeDetection
-            return ans2, ans3, function
-        elif ans == "2":
-            ans2 = input("Insert threshold value:")
-            ans3 = input("Insert maximum value:")
-            function = tasks.imageThresholding
-            return ans2, ans3, function
-        elif ans == "3":
-            ans2 = input("Insert angle:")
-            ans3 = input("Insert scale:")
-            function = tasks.rotation
-            return ans2, ans3, function
-        elif ans == "4":
-            ans2 = input("Insert Kernel's X:")
-            ans3 = input("Insert Kernel's Y:")
-            function = tasks.smoothBy_Averaging
-            return ans2, ans3, function
-        elif ans == "5":
-            function = tasks.laplacianDerivative
-            return None, None, function
-        elif ans == "9":
-            print("\n Goodbye")
-            ans = None
-            return None, None, None
-        else:
-            print("\n Not a valid choice! Please try again...")
+        if imageType == 0:
+            #SINGLE IMAGE
+            print("1. Edge Detection")
+            print("2. Thresholding")
+            print("3. Smooth by Averaging")
+            print("4. Laplacian Derivative")
+            print("9. Exit/Quit")
+            ans = input("What would you like to do? ")
+            if ans == "1":
+                ans2 = input("Insert minimum value:")
+                ans3 = input("Insert maximum value:")
+                function = tasks.edgeDetection
+                return ans2, ans3, function, 0
+            elif ans == "2":
+                ans2 = input("Insert threshold value:")
+                ans3 = input("Insert maximum value:")
+                function = tasks.imageThresholding
+                return ans2, ans3, function, 0
+            elif ans == "3":
+                ans2 = input("Insert Kernel's X:")
+                ans3 = input("Insert Kernel's Y:")
+                function = tasks.smoothBy_Averaging
+                return ans2, ans3, function, -1
+            elif ans == "4":
+                function = tasks.laplacianDerivative
+                return None, None, function, 0
+            elif ans == "9":
+                print("\n Goodbye")
+                ans = None
+                return None, None, None
+            else:
+                print("\n Not a valid choice! Please try again...")
+        elif imageType == 1:
+            #MULTIPLE IMAGES
+            print("1. Edge Detection")
+            print("2. Thresholding")
+            print("3. Rotation")
+            print("4. Smooth by Averaging")
+            print("5. Laplacian Derivative")
+            print("9. Exit/Quit")
+            ans = input("What would you like to do? ")
+            if ans == "1":
+                ans2 = input("Insert minimum value:")
+                ans3 = input("Insert maximum value:")
+                function = tasks.edgeDetection
+                return ans2, ans3, function, 0
+            elif ans == "2":
+                ans2 = input("Insert threshold value:")
+                ans3 = input("Insert maximum value:")
+                function = tasks.imageThresholding
+                return ans2, ans3, function, 0
+            elif ans == "3":
+                ans2 = input("Insert angle:")
+                ans3 = input("Insert scale:")
+                function = tasks.rotation
+                return ans2, ans3, function, 0
+            elif ans == "4":
+                ans2 = input("Insert Kernel's X:")
+                ans3 = input("Insert Kernel's Y:")
+                function = tasks.smoothBy_Averaging
+                return ans2, ans3, function, -1
+            elif ans == "5":
+                function = tasks.laplacianDerivative
+                return None, None, function, 0
+            elif ans == "9":
+                print("\n Goodbye")
+                ans = None
+                return None, None, None
+            else:
+                print("\n Not a valid choice! Please try again...")
 
 
-def singleImage(function, par1, par2):
+
+
+
+def singleImage(function, par1, par2, loadType):
     """
     Single image algorithm calls
     :param function:
@@ -274,11 +238,32 @@ def singleImage(function, par1, par2):
     """
     if par1 is None and par2 is None and function is None:
         return
+    elif par1 is None and par2 is None and function is not None:
+        imagePath = input("Insert Image Path:")
+        time_elapsed = []
+        for i in range(20):
+            begin_time = time.time()
+            handler = Handler()
+            handler.algorithmApplier(function, imagePath, False, loadType)
+            finish_time = time.time()
+            time_elapsed.append(finish_time - begin_time)
+            time.sleep(2)
+        print("Processing Times: " + str(time_elapsed))
+        print("Mean Processing Time was: " + str(np.mean(time_elapsed)) + " s")
     else:
         imagePath = input("Insert Image Path:")
-        algorithmApplier(function, imagePath, False, parameter1=par1, parameter2=par2)
+        time_elapsed = []
+        for i in range(20):
+            begin_time = time.time()
+            handler = Handler()
+            handler.algorithmApplier(function, imagePath, False,loadType, parameter1=par1, parameter2=par2)
+            finish_time = time.time()
+            time_elapsed.append(finish_time-begin_time)
+            time.sleep(2)
+        print("Processing Times: " + str(time_elapsed))
+        print("Mean Processing Time was: " + str(np.mean(time_elapsed)) +" s")
 
-def multiImage(function,par1,par2):
+def multiImage(function,par1,par2,loadType):
     """
     Multiple image algorithm processing
     :return:
@@ -290,11 +275,27 @@ def multiImage(function,par1,par2):
         # Making the path an absolute one
         fullPathToImage = os.path.abspath(imagePath)
         try:
-            for filename in os.listdir(fullPathToImage):
-                if filename.endswith(".png") or filename.endswith(".jpg"):
-                    algorithmApplier(function, fullPathToImage + "/" + filename, True, parameter1=par1, parameter2=par2)
-                else:
-                    print("Can't use this file")
+            time_elapsed = []
+            for i in range(20):
+                begin_time = time.time()
+                handler = Handler()
+                aFile = None
+                for filename in os.listdir(fullPathToImage):
+                    if filename.endswith(".png") or filename.endswith(".jpg"):
+                        if par1 is None and par2 is None and function is not None:
+                            handler.algorithmApplier(function, fullPathToImage + "/" + filename, True,loadType)
+                        else:
+                            handler.algorithmApplier(function, fullPathToImage + "/" + filename, True, loadType, parameter1=par1, parameter2=par2)
+                        aFile = fullPathToImage + "/" + filename
+                    else:
+                        print("Can't use this file")
+                image = File(aFile)
+                handler.getFolderResults(image)
+                finish_time = time.time()
+                time_elapsed.append(finish_time - begin_time)
+                time.sleep(2)
+            print("Processing Times: "+str(time_elapsed))
+            print("Mean Processing Time was: " + str(np.mean(time_elapsed)) + " s")
         except FileNotFoundError:
             print("Check if you entered the right path")
 
