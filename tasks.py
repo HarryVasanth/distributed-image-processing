@@ -64,7 +64,7 @@ def prespectiveTransformation():
 @app.task()
 def smoothBy_Averaging(image, kernelX, kernelY):
     """https://opencv-python-tutroals.readthedocs.io/en/latest/py_tutorials/py_imgproc/py_filtering/py_filtering.html """
-    blur = cv2.blur(image,(kernelX,kernelY))
+    blur = cv2.blur(image,(int(kernelX),int(kernelY)))
     return blur
 
 @app.task()
