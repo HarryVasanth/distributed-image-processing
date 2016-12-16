@@ -133,12 +133,12 @@ def mainMenu():
         ans = input("What would you like to do? ")
         if ans == "1":
             imageType = 0
-            par1, par2, function, loadType = algorithmsMenu(imageType)
-            singleImage(function,par1,par2, loadType)
+            par1, par2, function, loadType, times = algorithmsMenu(imageType)
+            singleImage(function,par1,par2, loadType, times)
         elif ans == "2":
             imageType = 1
-            par1, par2, function, loadType = algorithmsMenu(imageType)
-            multiImage(function, par1, par2, loadType)
+            par1, par2, function, loadType, times = algorithmsMenu(imageType)
+            multiImage(function, par1, par2, loadType, times)
         elif ans == "9":
             print("\n Goodbye")
             ans = None
@@ -164,21 +164,25 @@ def algorithmsMenu(imageType):
             if ans == "1":
                 ans2 = input("Insert minimum value:")
                 ans3 = input("Insert maximum value:")
+                ans4 = int(input("Insert number of tests:"))
                 function = tasks.edgeDetection
-                return ans2, ans3, function, 0
+                return ans2, ans3, function, 0, ans4
             elif ans == "2":
                 ans2 = input("Insert threshold value:")
                 ans3 = input("Insert maximum value:")
+                ans4 = int(input("Insert number of tests:"))
                 function = tasks.imageThresholding
-                return ans2, ans3, function, 0
+                return ans2, ans3, function, 0, ans4
             elif ans == "3":
                 ans2 = input("Insert Kernel's X:")
                 ans3 = input("Insert Kernel's Y:")
+                ans4 = int(input("Insert number of tests:"))
                 function = tasks.smoothBy_Averaging
-                return ans2, ans3, function, -1
+                return ans2, ans3, function, -1, ans4
             elif ans == "4":
+                ans1 = int(input("Insert number of tests:"))
                 function = tasks.laplacianDerivative
-                return None, None, function, 0
+                return None, None, function, 0, ans1
             elif ans == "9":
                 print("\n Goodbye")
                 ans = None
@@ -197,26 +201,31 @@ def algorithmsMenu(imageType):
             if ans == "1":
                 ans2 = input("Insert minimum value:")
                 ans3 = input("Insert maximum value:")
+                ans4 = int(input("Insert number of tests:"))
                 function = tasks.edgeDetection
-                return ans2, ans3, function, 0
+                return ans2, ans3, function, 0, ans4
             elif ans == "2":
                 ans2 = input("Insert threshold value:")
                 ans3 = input("Insert maximum value:")
+                ans4 = int(input("Insert number of tests:"))
                 function = tasks.imageThresholding
-                return ans2, ans3, function, 0
+                return ans2, ans3, function, 0, ans4
             elif ans == "3":
                 ans2 = input("Insert angle:")
                 ans3 = input("Insert scale:")
+                ans4 = int(input("Insert number of tests:"))
                 function = tasks.rotation
-                return ans2, ans3, function, 0
+                return ans2, ans3, function, 0, ans4
             elif ans == "4":
                 ans2 = input("Insert Kernel's X:")
                 ans3 = input("Insert Kernel's Y:")
+                ans4 = int(input("Insert number of tests:"))
                 function = tasks.smoothBy_Averaging
-                return ans2, ans3, function, -1
+                return ans2, ans3, function, -1, ans4
             elif ans == "5":
+                ans1 = int(input("Insert number of tests:"))
                 function = tasks.laplacianDerivative
-                return None, None, function, 0
+                return None, None, function, 0, ans1
             elif ans == "9":
                 print("\n Goodbye")
                 ans = None
@@ -228,7 +237,7 @@ def algorithmsMenu(imageType):
 
 
 
-def singleImage(function, par1, par2, loadType):
+def singleImage(function, par1, par2, loadType, times):
     """
     Single image algorithm calls
     :param function:
@@ -241,7 +250,7 @@ def singleImage(function, par1, par2, loadType):
     elif par1 is None and par2 is None and function is not None:
         imagePath = input("Insert Image Path:")
         time_elapsed = []
-        for i in range(20):
+        for i in range(times):
             begin_time = time.time()
             handler = Handler()
             handler.algorithmApplier(function, imagePath, False, loadType)
@@ -253,7 +262,7 @@ def singleImage(function, par1, par2, loadType):
     else:
         imagePath = input("Insert Image Path:")
         time_elapsed = []
-        for i in range(20):
+        for i in range(times):
             begin_time = time.time()
             handler = Handler()
             handler.algorithmApplier(function, imagePath, False,loadType, parameter1=par1, parameter2=par2)
@@ -263,7 +272,7 @@ def singleImage(function, par1, par2, loadType):
         print("Processing Times: " + str(time_elapsed))
         print("Mean Processing Time was: " + str(np.mean(time_elapsed)) +" s")
 
-def multiImage(function,par1,par2,loadType):
+def multiImage(function,par1,par2,loadType, times):
     """
     Multiple image algorithm processing
     :return:
@@ -276,7 +285,7 @@ def multiImage(function,par1,par2,loadType):
         fullPathToImage = os.path.abspath(imagePath)
         try:
             time_elapsed = []
-            for i in range(20):
+            for i in range(times):
                 begin_time = time.time()
                 handler = Handler()
                 aFile = None
