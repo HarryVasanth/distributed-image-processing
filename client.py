@@ -113,17 +113,12 @@ class Handler:
         while self.checkForNoneResults(self.results):
             for key, result in self.task_ids.items():
                 if result.ready():
-
                     r = requests.get("http://localhost:5555/api/task/info/" + result.id)
-                    print("http://localhost:5555/api/task/info/" + result.id)
-                    #Parsing Data
                     jsonFile = r.json()
-                    print(jsonFile)
-                    print(jsonFile['received'])
-                    print(jsonFile['started'])
-                    print(jsonFile['succeeded'])
-                    newCSV.writeRow(self.filename,jsonFile['name'],jsonFile['received'],jsonFile['started'],jsonFile['succeeded'],jsonFile['worker'])
-                    self.results[key] = result.get()
+                    if jsonFile["state"] == "SUCCESS":
+                        print(jsonFile['succeeded'])
+                        newCSV.writeRow(self.filename,jsonFile['name'],jsonFile['received'],jsonFile['started'],jsonFile['succeeded'],jsonFile['worker'])
+                        self.results[key] = result.get()
 
     def getSplitResults(self, imageOpen, path):
         self.checkProcessingState()
