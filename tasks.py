@@ -1,11 +1,11 @@
 import sys
 sys.path.append("~/.virtualenvs/venv/lib/python3.4/site-packages")
 import cv2 #THis will import open cv 2
-
+import numpy as np
 from celery_conf import app
 
 @app.task()
-def edgeDetection(image, minVal, maxVal):
+def edgeDetection(image, sigma=0.33):
     """
     OpenCV functiOn that will handle all the edge detection.
     :param image: Image path
@@ -13,7 +13,13 @@ def edgeDetection(image, minVal, maxVal):
     :param maxVal: Any edges below minVal are sure to be non-edges, do they're discarded
     :return:
     """
-    return cv2.Canny(image, minVal, maxVal)
+    # compute the median of the single channel pixel intensities
+    v = np.median(image)
+
+    # apply automatic Canny edge detection using the computed median
+    lower = int(max(0, (1.0 - sigma) * v))
+    upper = int(min(255, (1.0 + sigma) * v))
+    return cv2.Canny(image, lower, upper)
     # plt.subplot()
 
 @app.task()
