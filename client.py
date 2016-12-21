@@ -3,10 +3,11 @@ import cv2  # THis will import open cv 2
 from tkinter import *
 import tasks
 import collections
-import csv
 import numpy as np
 import time
-
+import csv
+import requests
+import datetime
 
 class File():
     """
@@ -46,17 +47,26 @@ class File():
         Write the received matrix to a image file on the directory
         :return:
         """
+        print(dir)
         path = os.path.split(dir)[0]
+        print(path)
         fileName = os.path.splitext(os.path.split(dir)[1])[0]
+        print(fileName)
         extension = os.path.splitext(dir)[1]
-        dir = path+"/results/"+fileName+"_processed"+extension
+        print(extension)
+        dir = path + "/results/" + fileName + "_processed" + extension
+        print(dir)
         cv2.imwrite(dir, image)
 
-class Handler:
 
+class Handler:
     task_ids = {}
     results = {}
-
+    filename = None
+    testNumber = 0
+    def restartData(self):
+        self.task_ids = {}
+        self.results = {}
 
     def checkForNoneResults(self, results):
         for key, result in results.items():
@@ -64,7 +74,7 @@ class Handler:
                 return True
         return False
 
-    def splitAndSend (self, image, path,algorithm, parameters):
+    def splitAndSend(self, image, path, algorithm, parameters):
         count = 0
         for chunk in image:
             if len(parameters) == 0:
@@ -96,10 +106,19 @@ class Handler:
         self.results[path] = None
 
     def checkProcessingState(self):
+        self.filename = self.filename + "_"+str(self.testNumber)
+        self.testNumber+=1
+        newCSV = GenerateCSV(self.filename)
+        newCSV.openCSVFile(self.filename)
         while self.checkForNoneResults(self.results):
             for key, result in self.task_ids.items():
                 if result.ready():
-                    self.results[key] = result.get()
+                    r = requests.get("http://localhost:5555/api/task/info/" + result.id)
+                    jsonFile = r.json()
+                    if jsonFile["state"] == "SUCCESS":
+                        print(jsonFile['succeeded'])
+                        newCSV.writeRow(self.filename,jsonFile['name'],jsonFile['received'],jsonFile['started'],jsonFile['succeeded'],jsonFile['worker'])
+                        self.results[key] = result.get()
 
     def getSplitResults(self, imageOpen, path):
         self.checkProcessingState()
@@ -113,15 +132,20 @@ class Handler:
             imageOpen.saveFile(result, key)
 
     """ Function to reuse in algorithm application"""
-    def algorithmApplier(self, algorithm, path, folder,loadType = 0, **parameters):
+
+    def algorithmApplier(self, algorithm, path, folder, loadType=0, **parameters):
+        self.filename = algorithm.__name__
         imageOpen = File(path)
         image = imageOpen.openFile(loadType)
 
         if (folder):
-            self.applyToCompleteImage(image,path,algorithm,parameters)
+            self.filename = self.filename + "_allImage"
+            self.applyToCompleteImage(image, path, algorithm, parameters)
         else:
-            self.splitAndSend(image,path,algorithm,parameters)
-            self.getSplitResults(imageOpen,path)
+            self.filename = self.filename + "_splited"
+            self.splitAndSend(image, path, algorithm, parameters)
+            self.getSplitResults(imageOpen, path)
+
 
 def mainMenu():
     """ Function to display Main Menu"""
@@ -134,7 +158,7 @@ def mainMenu():
         if ans == "1":
             imageType = 0
             par1, par2, function, loadType, times = algorithmsMenu(imageType)
-            singleImage(function,par1,par2, loadType, times)
+            singleImage(function, par1, par2, loadType, times)
         elif ans == "2":
             imageType = 1
             par1, par2, function, loadType, times = algorithmsMenu(imageType)
@@ -154,7 +178,7 @@ def algorithmsMenu(imageType):
     ans = True
     while ans:
         if imageType == 0:
-            #SINGLE IMAGE
+            # SINGLE IMAGE
             print("1. Edge Detection")
             print("2. Thresholding")
             print("3. Smooth by Averaging")
@@ -190,7 +214,7 @@ def algorithmsMenu(imageType):
             else:
                 print("\n Not a valid choice! Please try again...")
         elif imageType == 1:
-            #MULTIPLE IMAGES
+            # MULTIPLE IMAGES
             print("1. Edge Detection")
             print("2. Thresholding")
             print("3. Rotation")
@@ -234,9 +258,6 @@ def algorithmsMenu(imageType):
                 print("\n Not a valid choice! Please try again...")
 
 
-
-
-
 def singleImage(function, par1, par2, loadType, times):
     """
     Single image algorithm calls
@@ -249,30 +270,19 @@ def singleImage(function, par1, par2, loadType, times):
         return
     elif par1 is None and par2 is None and function is not None:
         imagePath = input("Insert Image Path:")
-        time_elapsed = []
+        handler = Handler()
         for i in range(times):
-            begin_time = time.time()
-            handler = Handler()
             handler.algorithmApplier(function, imagePath, False, loadType)
-            finish_time = time.time()
-            time_elapsed.append(finish_time - begin_time)
-            time.sleep(2)
-        print("Processing Times: " + str(time_elapsed))
-        print("Mean Processing Time was: " + str(np.mean(time_elapsed)) + " s")
+            handler.restartData()
     else:
         imagePath = input("Insert Image Path:")
-        time_elapsed = []
+        handler = Handler()
         for i in range(times):
-            begin_time = time.time()
-            handler = Handler()
-            handler.algorithmApplier(function, imagePath, False,loadType, parameter1=par1, parameter2=par2)
-            finish_time = time.time()
-            time_elapsed.append(finish_time-begin_time)
-            time.sleep(2)
-        print("Processing Times: " + str(time_elapsed))
-        print("Mean Processing Time was: " + str(np.mean(time_elapsed)) +" s")
+            handler.algorithmApplier(function, imagePath, False, loadType, parameter1=par1, parameter2=par2)
+            handler.restartData()
 
-def multiImage(function,par1,par2,loadType, times):
+
+def multiImage(function, par1, par2, loadType, times):
     """
     Multiple image algorithm processing
     :return:
@@ -285,31 +295,66 @@ def multiImage(function,par1,par2,loadType, times):
         fullPathToImage = os.path.abspath(imagePath)
         try:
             time_elapsed = []
+            handler = Handler()
             for i in range(times):
-                begin_time = time.time()
-                handler = Handler()
+                # begin_time = time.time()
                 aFile = None
                 for filename in os.listdir(fullPathToImage):
                     if filename.endswith(".png") or filename.endswith(".jpg"):
                         if par1 is None and par2 is None and function is not None:
-                            handler.algorithmApplier(function, fullPathToImage + "/" + filename, True,loadType)
+                            handler.algorithmApplier(function, fullPathToImage + "/" + filename, True, loadType)
                         else:
-                            handler.algorithmApplier(function, fullPathToImage + "/" + filename, True, loadType, parameter1=par1, parameter2=par2)
+                            handler.algorithmApplier(function, fullPathToImage + "/" + filename, True, loadType,
+                                                     parameter1=par1, parameter2=par2)
                         aFile = fullPathToImage + "/" + filename
                     else:
                         print("Can't use this file")
                 image = File(aFile)
                 handler.getFolderResults(image)
-                finish_time = time.time()
-                time_elapsed.append(finish_time - begin_time)
-                time.sleep(2)
-            print("Processing Times: "+str(time_elapsed))
-            print("Mean Processing Time was: " + str(np.mean(time_elapsed)) + " s")
+                handler.restartData()
         except FileNotFoundError:
             print("Check if you entered the right path")
 
     print("The Image Processing has finished")
 
+class GenerateCSV():
+    """
+    Generates a csv file with all the data from the tests
+    """
+
+    def __init__(self, filename):
+        """
+        Creates the csv and writes the header (Preparing File)
+        :param name:
+        """
+        with open("./csvFile/" + filename + ".csv", 'a', newline='') as fp:
+            self.timeConversion = timeCls()
+            self.a = csv.writer(fp, delimiter=',')
+            self.a.writerow(
+                ['Task', 'Task Received', 'Task Started', 'Task Succeed', 'Time Between Reception And Start Processing (s)','Processing Time (s)','Total Time(s)', 'WorkerName'])
+
+    def openCSVFile(self,filename):
+        """
+        Opens a File in append Mode
+        :param filename:
+        :return:
+        """
+        self.a = csv.writer(open("./csvFile/" + filename + ".csv", 'a'))
+
+
+    def writeRow(self, filename,taskname,receivedTime, startTime, endTime, whichworker):
+        """
+        Write a row in the CSV file
+        """
+
+        self.a.writerow([taskname, self.timeConversion.convertTimeStamp(receivedTime), self.timeConversion.convertTimeStamp(startTime), self.timeConversion.convertTimeStamp(endTime)
+                            , startTime-receivedTime, endTime-startTime,endTime - receivedTime, whichworker])
+class timeCls():
+    """
+    Time conversion class
+    """
+    def convertTimeStamp(self,timestamp):
+        return datetime.datetime.fromtimestamp(timestamp).strftime('%Y-%m-%d %H:%M:%S')
 
 if __name__ == "__main__":
     mainMenu()
