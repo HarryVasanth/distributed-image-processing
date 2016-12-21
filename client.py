@@ -186,11 +186,9 @@ def algorithmsMenu(imageType):
             print("9. Exit/Quit")
             ans = input("What would you like to do? ")
             if ans == "1":
-                ans2 = input("Insert minimum value:")
-                ans3 = input("Insert maximum value:")
                 ans4 = int(input("Insert number of tests:"))
                 function = tasks.edgeDetection
-                return ans2, ans3, function, 0, ans4
+                return function, 0, ans4
             elif ans == "2":
                 ans2 = input("Insert threshold value:")
                 ans3 = input("Insert maximum value:")
@@ -223,11 +221,9 @@ def algorithmsMenu(imageType):
             print("9. Exit/Quit")
             ans = input("What would you like to do? ")
             if ans == "1":
-                ans2 = input("Insert minimum value:")
-                ans3 = input("Insert maximum value:")
                 ans4 = int(input("Insert number of tests:"))
                 function = tasks.edgeDetection
-                return ans2, ans3, function, 0, ans4
+                return function, 0, ans4
             elif ans == "2":
                 ans2 = input("Insert threshold value:")
                 ans3 = input("Insert maximum value:")
