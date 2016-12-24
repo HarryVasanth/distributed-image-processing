@@ -113,10 +113,10 @@ class Handler:
         while self.checkForNoneResults(self.results):
             for key, result in self.task_ids.items():
                 if result.ready():
-                    r = requests.get("http://localhost:5555/api/task/info/" + result.id)
+                    r = requests.get("http://192.168.1.110:5555/api/task/info/" + result.id)
                     jsonFile = r.json()
                     if jsonFile["state"] == "SUCCESS":
-                        print(jsonFile['succeeded'])
+                        #print(jsonFile['succeeded'])
                         newCSV.writeRow(self.filename,jsonFile['name'],jsonFile['received'],jsonFile['started'],jsonFile['succeeded'],jsonFile['worker'])
                         self.results[key] = result.get()
 
@@ -186,11 +186,9 @@ def algorithmsMenu(imageType):
             print("9. Exit/Quit")
             ans = input("What would you like to do? ")
             if ans == "1":
-                ans2 = input("Insert minimum value:")
-                ans3 = input("Insert maximum value:")
                 ans4 = int(input("Insert number of tests:"))
                 function = tasks.edgeDetection
-                return ans2, ans3, function, 0, ans4
+                return None, None, function, 0, ans4
             elif ans == "2":
                 ans2 = input("Insert threshold value:")
                 ans3 = input("Insert maximum value:")
@@ -223,11 +221,9 @@ def algorithmsMenu(imageType):
             print("9. Exit/Quit")
             ans = input("What would you like to do? ")
             if ans == "1":
-                ans2 = input("Insert minimum value:")
-                ans3 = input("Insert maximum value:")
                 ans4 = int(input("Insert number of tests:"))
                 function = tasks.edgeDetection
-                return ans2, ans3, function, 0, ans4
+                return None, None, function, 0, ans4
             elif ans == "2":
                 ans2 = input("Insert threshold value:")
                 ans3 = input("Insert maximum value:")
