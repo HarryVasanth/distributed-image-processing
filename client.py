@@ -113,11 +113,12 @@ class Handler:
         while self.checkForNoneResults(self.results):
             for key, result in self.task_ids.items():
                 if result.ready():
-                    r = requests.get("http://192.168.1.110:5555/api/task/info/" + result.id)
+                    r = requests.get("http://localhost:5555/api/task/info/" + result.id)
                     jsonFile = r.json()
                     if jsonFile["state"] == "SUCCESS":
                         #print(jsonFile['succeeded'])
-                        newCSV.writeRow(self.filename,jsonFile['name'],jsonFile['received'],jsonFile['started'],jsonFile['succeeded'],jsonFile['worker'])
+                        #    def writeRow(self,taskUID, taskname,receivedTime, startTime, endTime,runtime, whichworker):
+                        newCSV.writeRow(jsonFile['task-id'],jsonFile['name'],jsonFile['received'],jsonFile['started'],jsonFile['succeeded'],jsonFile['runtime'],jsonFile['worker'])
                         self.results[key] = result.get()
 
     def getSplitResults(self, imageOpen, path):
@@ -267,15 +268,27 @@ def singleImage(function, par1, par2, loadType, times):
     elif par1 is None and par2 is None and function is not None:
         imagePath = input("Insert Image Path:")
         handler = Handler()
+        time_elapsed = []
         for i in range(times):
+            begin_time = time.time()
             handler.algorithmApplier(function, imagePath, False, loadType)
             handler.restartData()
+            finish_time = time.time()
+            time_elapsed.append(finish_time - begin_time)
+        print("Processing Times: " + str(time_elapsed))
+        print("Mean Processing Time was: " + str(np.mean(time_elapsed)) + " s")
     else:
         imagePath = input("Insert Image Path:")
+        time_elapsed = []
         handler = Handler()
         for i in range(times):
+            begin_time = time.time()
             handler.algorithmApplier(function, imagePath, False, loadType, parameter1=par1, parameter2=par2)
             handler.restartData()
+            finish_time = time.time()
+            time_elapsed.append(finish_time - begin_time)
+        print("Processing Times: " + str(time_elapsed))
+        print("Mean Processing Time was: " + str(np.mean(time_elapsed)) + " s")
 
 
 def multiImage(function, par1, par2, loadType, times):
@@ -293,7 +306,7 @@ def multiImage(function, par1, par2, loadType, times):
             time_elapsed = []
             handler = Handler()
             for i in range(times):
-                # begin_time = time.time()
+                begin_time = time.time()
                 aFile = None
                 for filename in os.listdir(fullPathToImage):
                     if filename.endswith(".png") or filename.endswith(".jpg"):
@@ -308,6 +321,10 @@ def multiImage(function, par1, par2, loadType, times):
                 image = File(aFile)
                 handler.getFolderResults(image)
                 handler.restartData()
+                finish_time = time.time()
+                time_elapsed.append(finish_time - begin_time)
+            print("Processing Times: " + str(time_elapsed))
+            print("Mean Processing Time was: " + str(np.mean(time_elapsed)) + " s")
         except FileNotFoundError:
             print("Check if you entered the right path")
 
@@ -327,7 +344,7 @@ class GenerateCSV():
             self.timeConversion = timeCls()
             self.a = csv.writer(fp, delimiter=',')
             self.a.writerow(
-                ['Task', 'Task Received', 'Task Started', 'Task Succeed', 'Time Between Reception And Start Processing (s)','Processing Time (s)','Total Time(s)', 'WorkerName'])
+                ['TaskUID','Task', 'Task Received', 'Task Started', 'Task Succeed', 'Runtime', 'Time Between Reception And Start Processing (s)','Processing Time (s)','Total Time(s)', 'WorkerName'])
 
     def openCSVFile(self,filename):
         """
@@ -338,12 +355,13 @@ class GenerateCSV():
         self.a = csv.writer(open("./csvFile/" + filename + ".csv", 'a'))
 
 
-    def writeRow(self, filename,taskname,receivedTime, startTime, endTime, whichworker):
+    def writeRow(self,taskUID, taskname,receivedTime, startTime, endTime,runtime, whichworker):
         """
         Write a row in the CSV file
         """
 
-        self.a.writerow([taskname, self.timeConversion.convertTimeStamp(receivedTime), self.timeConversion.convertTimeStamp(startTime), self.timeConversion.convertTimeStamp(endTime)
+
+        self.a.writerow([taskUID,taskname,receivedTime, startTime, endTime, runtime
                             , startTime-receivedTime, endTime-startTime,endTime - receivedTime, whichworker])
 class timeCls():
     """
