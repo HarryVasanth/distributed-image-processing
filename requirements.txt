@@ -5,7 +5,7 @@ billiard==3.3.0.23
 chardet==2.3.0
 codebug-i2c-tether==0.2.3
 codebug-tether==0.7.0
-colorama==0.3.2
+colorama==0.4.6
 Flask==0.10.1
 gpiozero==1.6.2
 html5lib==0.999
