@@ -12,7 +12,7 @@ html5lib==0.999
 itsdangerous==0.24
 Jinja2==2.11.3
 kombu==3.0.37
-MarkupSafe==0.23
+MarkupSafe==2.1.1
 mcpi==0.1.1
 numpy==1.11.2
 pbr==1.10.0
