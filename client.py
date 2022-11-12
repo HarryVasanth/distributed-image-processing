@@ -9,7 +9,8 @@ import csv
 import requests
 import datetime
 
-class File():
+
+class File:
     """
     Implements all file operation Open Close and Save Files
     """
@@ -28,17 +29,17 @@ class File():
         """
         self.im = cv2.imread(self.path, loadType)
         if self.im == None or self.im.size == 0:
-            print('Image loaded is empty')
+            print("Image loaded is empty")
             sys.exit(1)
         else:
-            return self.im;
+            return self.im
 
     def showFile(self):
         """
         Does not work in linux need to install some libs
         :return:
         """
-        cv2.imshow('image', image)
+        cv2.imshow("image", image)
         cv2.waitKey(0)
         cv2.destroyAllWindows()
 
@@ -64,6 +65,7 @@ class Handler:
     results = {}
     filename = None
     testNumber = 0
+
     def restartData(self):
         self.task_ids = {}
         self.results = {}
@@ -80,14 +82,22 @@ class Handler:
             if len(parameters) == 0:
                 self.task_ids[count] = algorithm.delay(chunk)
             elif len(parameters) == 1:
-                self.task_ids[count] = algorithm.delay(chunk, float(parameters.get("parameter1")))
+                self.task_ids[count] = algorithm.delay(
+                    chunk, float(parameters.get("parameter1"))
+                )
             elif len(parameters) == 2:
-                self.task_ids[count] = \
-                    algorithm.delay(chunk, float(parameters.get("parameter1")), float(parameters.get("parameter2")))
+                self.task_ids[count] = algorithm.delay(
+                    chunk,
+                    float(parameters.get("parameter1")),
+                    float(parameters.get("parameter2")),
+                )
             elif len(parameters) == 3:
-                self.task_ids[count] = \
-                    algorithm.delay(chunk, float(parameters.get("parameter1")), float(parameters.get("parameter2")),
-                                    float(parameters.get("parameter3")))
+                self.task_ids[count] = algorithm.delay(
+                    chunk,
+                    float(parameters.get("parameter1")),
+                    float(parameters.get("parameter2")),
+                    float(parameters.get("parameter3")),
+                )
             self.results[count] = None
             count = count + 1
 
@@ -95,19 +105,27 @@ class Handler:
         if len(parameters) == 0:
             self.task_ids[path] = algorithm.delay(image)
         elif len(parameters) == 1:
-            self.task_ids[path] = algorithm.delay(image, float(parameters.get("parameter1")))
+            self.task_ids[path] = algorithm.delay(
+                image, float(parameters.get("parameter1"))
+            )
         elif len(parameters) == 2:
-            self.task_ids[path] = \
-                algorithm.delay(image, float(parameters.get("parameter1")), float(parameters.get("parameter2")))
+            self.task_ids[path] = algorithm.delay(
+                image,
+                float(parameters.get("parameter1")),
+                float(parameters.get("parameter2")),
+            )
         elif len(parameters) == 3:
-            self.task_ids[path] = \
-                algorithm.delay(image, float(parameters.get("parameter1")), float(parameters.get("parameter2")),
-                                float(parameters.get("parameter3")))
+            self.task_ids[path] = algorithm.delay(
+                image,
+                float(parameters.get("parameter1")),
+                float(parameters.get("parameter2")),
+                float(parameters.get("parameter3")),
+            )
         self.results[path] = None
 
     def checkProcessingState(self):
-        self.filename = self.filename + "_"+str(self.testNumber)
-        self.testNumber+=1
+        self.filename = self.filename + "_" + str(self.testNumber)
+        self.testNumber += 1
         newCSV = GenerateCSV(self.filename)
         newCSV.openCSVFile(self.filename)
         while self.checkForNoneResults(self.results):
@@ -116,14 +134,24 @@ class Handler:
                     r = requests.get("http://localhost:5555/api/task/info/" + result.id)
                     jsonFile = r.json()
                     if jsonFile["state"] == "SUCCESS":
-                        #print(jsonFile['succeeded'])
+                        # print(jsonFile['succeeded'])
                         #    def writeRow(self,taskUID, taskname,receivedTime, startTime, endTime,runtime, whichworker):
-                        newCSV.writeRow(jsonFile['task-id'],jsonFile['name'],jsonFile['received'],jsonFile['started'],jsonFile['succeeded'],jsonFile['runtime'],jsonFile['worker'])
+                        newCSV.writeRow(
+                            jsonFile["task-id"],
+                            jsonFile["name"],
+                            jsonFile["received"],
+                            jsonFile["started"],
+                            jsonFile["succeeded"],
+                            jsonFile["runtime"],
+                            jsonFile["worker"],
+                        )
                         self.results[key] = result.get()
 
     def getSplitResults(self, imageOpen, path):
         self.checkProcessingState()
-        self.results = np.array([value for (key, value) in sorted(self.results.items())])
+        self.results = np.array(
+            [value for (key, value) in sorted(self.results.items())]
+        )
         imageOpen.saveFile(self.results, path)
 
     def getFolderResults(self, imageOpen):
@@ -139,7 +167,7 @@ class Handler:
         imageOpen = File(path)
         image = imageOpen.openFile(loadType)
 
-        if (folder):
+        if folder:
             self.filename = self.filename + "_allImage"
             self.applyToCompleteImage(image, path, algorithm, parameters)
         else:
@@ -149,7 +177,7 @@ class Handler:
 
 
 def mainMenu():
-    """ Function to display Main Menu"""
+    """Function to display Main Menu"""
     ans = True
     while ans:
         print("1. Select spliting algorithm")
@@ -283,7 +311,9 @@ def singleImage(function, par1, par2, loadType, times):
         handler = Handler()
         for i in range(times):
             begin_time = time.time()
-            handler.algorithmApplier(function, imagePath, False, loadType, parameter1=par1, parameter2=par2)
+            handler.algorithmApplier(
+                function, imagePath, False, loadType, parameter1=par1, parameter2=par2
+            )
             handler.restartData()
             finish_time = time.time()
             time_elapsed.append(finish_time - begin_time)
@@ -311,10 +341,21 @@ def multiImage(function, par1, par2, loadType, times):
                 for filename in os.listdir(fullPathToImage):
                     if filename.endswith(".png") or filename.endswith(".jpg"):
                         if par1 is None and par2 is None and function is not None:
-                            handler.algorithmApplier(function, fullPathToImage + "/" + filename, True, loadType)
+                            handler.algorithmApplier(
+                                function,
+                                fullPathToImage + "/" + filename,
+                                True,
+                                loadType,
+                            )
                         else:
-                            handler.algorithmApplier(function, fullPathToImage + "/" + filename, True, loadType,
-                                                     parameter1=par1, parameter2=par2)
+                            handler.algorithmApplier(
+                                function,
+                                fullPathToImage + "/" + filename,
+                                True,
+                                loadType,
+                                parameter1=par1,
+                                parameter2=par2,
+                            )
                         aFile = fullPathToImage + "/" + filename
                     else:
                         print("Can't use this file")
@@ -330,7 +371,8 @@ def multiImage(function, par1, par2, loadType, times):
 
     print("The Image Processing has finished")
 
-class GenerateCSV():
+
+class GenerateCSV:
     """
     Generates a csv file with all the data from the tests
     """
@@ -340,35 +382,63 @@ class GenerateCSV():
         Creates the csv and writes the header (Preparing File)
         :param name:
         """
-        with open("./csvFile/" + filename + ".csv", 'a', newline='') as fp:
+        with open("./csvFile/" + filename + ".csv", "a", newline="") as fp:
             self.timeConversion = timeCls()
-            self.a = csv.writer(fp, delimiter=',')
+            self.a = csv.writer(fp, delimiter=",")
             self.a.writerow(
-                ['TaskUID','Task', 'Task Received', 'Task Started', 'Task Succeed', 'Runtime', 'Time Between Reception And Start Processing (s)','Processing Time (s)','Total Time(s)', 'WorkerName'])
+                [
+                    "TaskUID",
+                    "Task",
+                    "Task Received",
+                    "Task Started",
+                    "Task Succeed",
+                    "Runtime",
+                    "Time Between Reception And Start Processing (s)",
+                    "Processing Time (s)",
+                    "Total Time(s)",
+                    "WorkerName",
+                ]
+            )
 
-    def openCSVFile(self,filename):
+    def openCSVFile(self, filename):
         """
         Opens a File in append Mode
         :param filename:
         :return:
         """
-        self.a = csv.writer(open("./csvFile/" + filename + ".csv", 'a'))
+        self.a = csv.writer(open("./csvFile/" + filename + ".csv", "a"))
 
-
-    def writeRow(self,taskUID, taskname,receivedTime, startTime, endTime,runtime, whichworker):
+    def writeRow(
+        self, taskUID, taskname, receivedTime, startTime, endTime, runtime, whichworker
+    ):
         """
         Write a row in the CSV file
         """
 
+        self.a.writerow(
+            [
+                taskUID,
+                taskname,
+                receivedTime,
+                startTime,
+                endTime,
+                runtime,
+                startTime - receivedTime,
+                endTime - startTime,
+                endTime - receivedTime,
+                whichworker,
+            ]
+        )
 
-        self.a.writerow([taskUID,taskname,receivedTime, startTime, endTime, runtime
-                            , startTime-receivedTime, endTime-startTime,endTime - receivedTime, whichworker])
-class timeCls():
+
+class timeCls:
     """
     Time conversion class
     """
-    def convertTimeStamp(self,timestamp):
-        return datetime.datetime.fromtimestamp(timestamp).strftime('%Y-%m-%d %H:%M:%S')
+
+    def convertTimeStamp(self, timestamp):
+        return datetime.datetime.fromtimestamp(timestamp).strftime("%Y-%m-%d %H:%M:%S")
+
 
 if __name__ == "__main__":
     mainMenu()
