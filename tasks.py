@@ -1,8 +1,10 @@
 import sys
+
 sys.path.append("~/.virtualenvs/venv/lib/python3.4/site-packages")
-import cv2 #THis will import open cv 2
+import cv2  # THis will import open cv 2
 import numpy as np
 from celery_conf import app
+
 
 @app.task()
 def edgeDetection(image, sigma=0.33):
@@ -22,6 +24,7 @@ def edgeDetection(image, sigma=0.33):
     return cv2.Canny(image, lower, upper)
     # plt.subplot()
 
+
 @app.task()
 def imageThresholding(image, thresholdValue=127, maxVal=122):
     """
@@ -34,16 +37,19 @@ def imageThresholding(image, thresholdValue=127, maxVal=122):
     :param maxVal:  represents the value to be given if pixel value is more than (sometimes less than) the threshold value (0 - black,  255 - White)
     :return:
     """
-    ret, th1 = cv2.threshold(image, thresholdValue, maxVal,cv2.THRESH_BINARY)
+    ret, th1 = cv2.threshold(image, thresholdValue, maxVal, cv2.THRESH_BINARY)
     return th1
+
 
 @app.task()
 def scaling():
     pass
 
+
 @app.task()
 def translation():
     pass
+
 
 @app.task()
 def rotation(image, angle, scale):
@@ -55,31 +61,33 @@ def rotation(image, angle, scale):
     :param scale: Isotropic scale factor.
     :return:
     """
-    #img = cv2.imread(image,0)
-    rows,cols = image.shape
+    # img = cv2.imread(image,0)
+    rows, cols = image.shape
 
-    M = cv2.getRotationMatrix2D((cols/2,rows/2),angle,scale)
-    dst = cv2.warpAffine(image,M,(cols,rows))
+    M = cv2.getRotationMatrix2D((cols / 2, rows / 2), angle, scale)
+    dst = cv2.warpAffine(image, M, (cols, rows))
     return dst
-    
+
 
 @app.task()
 def prespectiveTransformation():
     pass
 
+
 @app.task()
 def smoothBy_Averaging(image, kernelX, kernelY):
-    """https://opencv-python-tutroals.readthedocs.io/en/latest/py_tutorials/py_imgproc/py_filtering/py_filtering.html """
-    blur = cv2.blur(image,(int(kernelX),int(kernelY)))
+    """https://opencv-python-tutroals.readthedocs.io/en/latest/py_tutorials/py_imgproc/py_filtering/py_filtering.html"""
+    blur = cv2.blur(image, (int(kernelX), int(kernelY)))
     return blur
+
 
 @app.task()
 def smoothBy_Blur():
     pass
 
+
 @app.task()
 def laplacianDerivative(image):
     """https://opencv-python-tutroals.readthedocs.io/en/latest/py_tutorials/py_imgproc/py_gradients/py_gradients.html"""
-    laplacian = cv2.Laplacian(image,cv2.CV_64F)
+    laplacian = cv2.Laplacian(image, cv2.CV_64F)
     return laplacian
-
