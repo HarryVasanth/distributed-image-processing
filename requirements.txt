@@ -19,7 +19,7 @@ pbr==1.10.0
 pgzero==1.1
 picamera==1.12
 picraft==0.6
-pifacecommon==4.2.1
+pifacecommon==4.2.2
 pifacedigitalio==3.1.0
 pigpio==1.30
 Pillow==2.6.1
