@@ -25,7 +25,7 @@ pigpio==1.30
 Pillow==9.0.1
 pygame==1.9.2a0
 pygobject==3.14.0
-pyinotify==0.9.4
+pyinotify==0.9.6
 pyOpenSSL==17.5.0
 pyserial==3.5
 python-apt==0.9.3.12
