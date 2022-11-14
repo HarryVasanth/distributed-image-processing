@@ -10,7 +10,7 @@ Flask==2.2.2
 gpiozero==1.6.2
 html5lib==0.999999999
 itsdangerous==0.24
-Jinja2==2.11.3
+Jinja2==3.1.2
 kombu==3.0.37
 MarkupSafe==2.1.1
 mcpi==0.1.1
