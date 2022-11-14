@@ -18,7 +18,7 @@ numpy==1.23.4
 pbr==5.11.0
 pgzero==1.1
 picamera==1.12
-picraft==0.6
+picraft==1.0
 pifacecommon==4.2.2
 pifacedigitalio==3.1.0
 pigpio==1.30
