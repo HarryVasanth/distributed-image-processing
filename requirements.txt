@@ -4,7 +4,7 @@ anyjson==0.3.3
 billiard==4.0.2
 chardet==5.0.0
 codebug-i2c-tether==0.3.0
-codebug-tether==0.7.0
+codebug-tether==0.9.1
 colorama==0.4.6
 Flask==2.2.2
 gpiozero==1.6.2
