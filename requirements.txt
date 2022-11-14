@@ -24,7 +24,7 @@ pifacedigitalio==3.1.0
 pigpio==1.30
 Pillow==9.3.0
 pygame==2.1.3.dev8
-pygobject==3.14.0
+pygobject==3.42.2
 pyinotify==0.9.6
 pyOpenSSL==17.5.0
 pyserial==3.5
