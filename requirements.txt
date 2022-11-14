@@ -3,7 +3,7 @@ amqp==5.1.1
 anyjson==0.3.3
 billiard==4.0.2
 chardet==2.3.0
-codebug-i2c-tether==0.2.3
+codebug-i2c-tether==0.3.0
 codebug-tether==0.7.0
 colorama==0.4.6
 Flask==2.2.2
