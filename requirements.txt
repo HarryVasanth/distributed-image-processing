@@ -36,7 +36,7 @@ requests==2.20.0
 RPi.GPIO==0.6.3
 RTIMULib==7.2.1
 sense-emu==1.0
-sense-hat==2.2.0
+sense-hat==2.4.0
 six==1.16.0
 smbus==1.1
 spidev==3.6
