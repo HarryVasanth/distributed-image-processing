@@ -42,7 +42,7 @@ smbus==1.1.post2
 spidev==3.6
 stevedore==4.1.1
 twython==3.9.1
-urllib3==1.26.12
+urllib3==1.26.13
 vine==5.0.0
 virtualenv==20.17.0
 virtualenv-clone==0.5.7
