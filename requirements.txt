@@ -29,7 +29,7 @@ pyinotify==0.9.6
 pyOpenSSL==22.1.0
 pyserial==3.5
 python-apt==0.9.3.12
-python-debian==0.1.48
+python-debian==0.1.49
 pytz==2022.6
 redis==4.3.5
 requests==2.28.1
