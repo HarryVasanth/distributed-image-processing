@@ -44,7 +44,7 @@ stevedore==4.1.1
 twython==3.9.1
 urllib3==1.26.12
 vine==5.0.0
-virtualenv==20.16.7
+virtualenv==20.17.0
 virtualenv-clone==0.5.7
 virtualenvwrapper==4.8.4
 Werkzeug==2.2.2
