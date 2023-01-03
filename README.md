@@ -22,7 +22,7 @@ The `tasks.py` defines a number of functions that perform various image processi
 - `smoothBy_Blur`: This function smooths an image using a blur filter.
 - `laplacianDerivative`: This function applies the Laplacian derivative to an image, which can be used for edge detection.
 
-### Flowchart
+### Flowchart for `tasks.py`
 
 ```mermaid
 graph LR
@@ -62,4 +62,49 @@ prespectiveTransformation[Prespective Transformation] --> laplacianDerivative[La
 smoothBy_Averaging[Smooth by Averaging] --> smoothBy_Blur[Smooth by Blur]
 smoothBy_Averaging[Smooth by Averaging] --> laplacianDerivative[Laplacian Derivative]
 smoothBy_Blur[Smooth by Blur] --> laplacianDerivative[Laplacian Derivative]
+```
+
+## Function of `client.py`
+
+The `client.py` defines a `File` class that has methods for opening and showing images, as well as saving images. It also defines a `Handler` class that has methods for managing the processing of images using tasks defined in the `tasks` module. Here is a brief description of each method:
+
+- `File.openFile`: This method opens an image file and returns the image as a NumPy array.
+- `File.showFile`: This method displays an image using OpenCV.
+- `File.saveFile`: This method saves an image to a specified directory.
+- `Handler.restartData`: This method resets the task_ids and results dictionaries.
+- `Handler.checkForNoneResults`: This method checks if any of the values in the results dictionary are None.
+- `Handler.splitAndSend`: This method splits an image into chunks and sends each chunk to a task defined in the tasks module.
+- `Handler.applyToCompleteImage`: This method sends an entire image to a task defined in the tasks module.
+- `Handler.checkProcessingState`: This method checks the status of tasks and stores the results in the results dictionary.
+- `Handler.checkAllResults`: This method retrieves the results of tasks and displays and saves the resulting images.
+
+The `GenerateCSV` class has methods for creating and writing to a CSV file, as well as closing the file when finished.
+
+### Flowchart for `client.py`
+
+```mermaid
+graph LR
+File[File] --> openFile[openFile]
+File[File] --> showFile[showFile]
+File[File] --> saveFile[saveFile]
+openFile[openFile] --> showFile[showFile]
+openFile[openFile] --> saveFile[saveFile]
+Handler[Handler] --> restartData[restartData]
+Handler[Handler] --> checkForNoneResults[checkForNoneResults]
+Handler[Handler] --> splitAndSend[splitAndSend]
+Handler[Handler] --> applyToCompleteImage[applyToCompleteImage]
+Handler[Handler] --> checkProcessingState[checkProcessingState]
+Handler[Handler] --> checkAllResults[checkAllResults]
+checkProcessingState[checkProcessingState] --> checkForNoneResults[checkForNoneResults]
+checkProcessingState[checkProcessingState] --> GenerateCSV[GenerateCSV]
+checkProcessingState[checkProcessingState] --> checkAllResults[checkAllResults]
+checkAllResults[checkAllResults] --> showFile[showFile]
+checkAllResults[checkAllResults] --> saveFile[saveFile]
+checkAllResults[checkAllResults] --> GenerateCSV[GenerateCSV]
+GenerateCSV[GenerateCSV] --> openCSVFile[openCSVFile]
+GenerateCSV[GenerateCSV] --> writeToFile[writeToFile]
+GenerateCSV[GenerateCSV] --> closeFile[closeFile]
+openCSVFile[openCSVFile] --> writeToFile[writeToFile]
+openCSVFile[openCSVFile] --> closeFile[closeFile]
+writeToFile[writeToFile] --> closeFile[closeFile]
 ```
