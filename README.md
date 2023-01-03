@@ -108,3 +108,22 @@ openCSVFile[openCSVFile] --> writeToFile[writeToFile]
 openCSVFile[openCSVFile] --> closeFile[closeFile]
 writeToFile[writeToFile] --> closeFile[closeFile]
 ```
+
+## Function of `celery_conf.py`
+
+The `celery_conf.py` sets up a `Celery` instance named `app` that is used to run tasks in a distributed manner. The `Celery` instance is configured with a message broker (AMQP) and a result backend (Redis) to enable communication between tasks and workers. The `include` parameter specifies a list of modules containing tasks that the `Celery` instance should be able to run. The `task_serializer`, `result_serializer`, and `accept_content` parameters specify the serialization format for tasks and results, and the `worker_send_task_events` parameter enables task event support.
+
+### Flowchar for `celery_conf.py`
+
+```mermaid
+graph LR
+app[app] --> Celery[Celery]
+Celery[Celery] --> broker[broker]
+Celery[Celery] --> backend[backend]
+Celery[Celery] --> include[include]
+app[app] --> conf[conf]
+conf[conf] --> task_serializer[task_serializer]
+conf[conf] --> result_serializer[result_serializer]
+conf[conf] --> accept_content[accept_content]
+conf[conf] --> worker_send_task_events[worker_send_task_events]
+```
