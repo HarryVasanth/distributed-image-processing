@@ -1,8 +1,10 @@
 # 🖼️ Distributed Image Processing System
 
-This repository has some files that aims to create a distributed image processing system using Python Celery.
+This is a program that performs various image processing functions defined in the `tasks.py` file using distributed workers. The operations include edge detection, image thresholding, scaling, translation, rotation, perspective transformation, smoothing by averaging or blurring, and applying the Laplacian derivative. 
 
 ## Requirements
+
+This program requires the installation of the Celery, NumPy, and SciPy libraries.
 
 ```zsh
 pip install celery numpy scipy
