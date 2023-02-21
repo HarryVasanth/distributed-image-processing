@@ -12,7 +12,7 @@ jobs:
 
     steps:
       - name: 🐧 Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: 💋 Check files using the Black Formatter
         uses: rickstaa/action-black@v1
