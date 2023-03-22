@@ -23,7 +23,7 @@ pifacecommon==4.2.2
 pifacedigitalio==3.1.0
 pigpio==1.78
 Pillow==9.3.0
-pygame==2.2.0.dev2
+pygame==2.3.0.dev2
 pygobject==3.42.2
 pyinotify==0.9.6
 pyOpenSSL==22.1.0
@@ -42,7 +42,7 @@ smbus==1.1.post2
 spidev==3.6
 stevedore==5.0.0
 twython==3.9.1
-urllib3==1.26.14
+urllib3==1.26.15
 vine==5.0.0
 virtualenv==20.21.0
 virtualenv-clone==0.5.7
