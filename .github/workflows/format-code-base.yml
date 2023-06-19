@@ -1,27 +1,28 @@
-name: 💅 Format Codebase
+name: 💄 Format Code Base
 
 on:
   push:
-    branches:
-      - master
-
-permissions: write-all
+    branches: ["master"]
+  pull_request:
+    branches: ["master"]
 
 jobs:
-  format-codebase:
+  format-code-base:
+    name: 💄 Format Code Base
     runs-on: ubuntu-latest
 
     steps:
-      - name: 📀 Checkout Repository
-        uses: actions/checkout@v3
+      - name: 🐧 Checkout
+        uses: actions/checkout@v2
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          ref: ${{ github.head_ref }}
 
       - name: 💄 Run Prettier
         uses: creyD/prettier_action@v4.3
         with:
           prettier_options: --write **/*.{js,md,yml,sh,html,css}
           prettier_plugins: "prettier-plugin-sh"
+          commit_message: "chore(codebase): format with prettier"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
