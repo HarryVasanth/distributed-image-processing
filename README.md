@@ -1,6 +1,6 @@
 # 🖼️ Distributed Image Processing System
 
-This is a program that performs various image processing functions defined in the `tasks.py` file using distributed workers. The operations include edge detection, image thresholding, scaling, translation, rotation, perspective transformation, smoothing by averaging or blurring, and applying the Laplacian derivative. 
+This is a program that performs various image processing functions defined in the `tasks.py` file using distributed workers. The operations include edge detection, image thresholding, scaling, translation, rotation, perspective transformation, smoothing by averaging or blurring, and applying the Laplacian derivative.
 
 ## Requirements
 
