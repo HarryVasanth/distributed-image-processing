@@ -21,8 +21,7 @@ jobs:
       - name: 💄 Run Prettier
         uses: creyD/prettier_action@v4.3
         with:
-          prettier_options: --write **/*.{js,md,yml,sh,html,css}
-          prettier_plugins: "prettier-plugin-sh"
+          prettier_options: --write **/*.{js,md,yml,html,css}
           commit_message: "chore(codebase): format with prettier"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
