@@ -22,7 +22,7 @@ picraft==1.0
 pifacecommon==4.2.2
 pifacedigitalio==3.1.0
 pigpio==1.78
-Pillow==10.2.0
+Pillow==10.3.0
 pygame==2.5.2
 pygobject==3.48.2
 pyinotify==0.9.6
