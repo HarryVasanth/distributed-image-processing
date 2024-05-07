@@ -6,7 +6,7 @@ chardet==5.2.0
 codebug-i2c-tether==0.3.0
 codebug-tether==0.9.1
 colorama==0.4.6
-Flask==3.0.2
+Flask==3.0.3
 gpiozero==2.0.1
 html5lib==1.1
 itsdangerous==2.1.2
