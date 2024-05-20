@@ -32,7 +32,7 @@ python-apt==0.9.3.12
 python-debian==0.1.49
 pytz==2024.1
 redis==5.0.4
-requests==2.31.0
+requests==2.32.0
 RPi.GPIO==0.7.1
 RTIMULib==7.2.1
 sense-emu==1.2.1
