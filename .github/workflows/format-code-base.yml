@@ -7,38 +7,43 @@ on:
     branches: ["master"]
   workflow_dispatch:
 
+permissions:
+  contents: write
+
+concurrency:
+  group: format-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  format-code-base:
+  format:
     name: 💄 Format Code Base
     runs-on: ubuntu-latest
+    if: github.actor != 'dependabot[bot]'
 
     steps:
       - name: 🐧 Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           ref: ${{ github.head_ref }}
-
-      - name: 💄 Run Prettier
-        uses: creyD/prettier_action@v4.3
-        with:
-          prettier_options: --write **/*.{js,md,yml,html,css}
-          commit_message: "chore(codebase): format with prettier"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: 🐍 Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v7
         with:
           python-version: "3.13"
+          cache: pip
+          cache-dependency-path: pyproject.toml
 
-      - name: 🖤 Format code with black
+      - name: 🐍 Format Python with Ruff
         run: |
-          git config --global user.email "hello@harryvasanth.com"
-          git config --global user.name "HarryVasanth"
-          pip install black
-          black . --verbose
-          git add .
+          pip install ruff==0.17.6
+          ruff check --fix .
+          ruff format .
 
-      - name: 📎 Push changes
-        run: |
-          git diff-index --quiet HEAD || git commit -m "chore(codebase): format with black" && git push || echo "No changes" && exit
+      - name: 💄 Format Markdown and YAML
+        run: npx --yes prettier@3 --write "**/*.{md,yml,yaml,json}"
+
+      - name: 📎 Commit changes
+        uses: stefanzweifel/git-auto-commit-action@v7
+        with:
+          commit_message: "chore(codebase): format with ruff and prettier"
