@@ -70,7 +70,7 @@ classDef darkMode fill:#333333, stroke:#FFFFFF, color:#FFFFFF;
 
 classDef lightModeLinks stroke:#333333;
 classDef darkModeLinks stroke:#FFFFFF;
-    
+
 class edgeDetection,imageThresholding,scaling,translation,rotation,prespectiveTransformation,smoothBy_Averaging,smoothBy_Blur,laplacianDerivative lightMode;
 class edgeDetection,imageThresholding,scaling,translation,rotation,prespectiveTransformation,smoothBy_Averaging,smoothBy_Blur,laplacianDerivative darkMode;
 
