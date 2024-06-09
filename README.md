@@ -1,6 +1,6 @@
 # 🖼️ Distributed Image Processing System
 
-This is a program that performs various image processing functions defined in the `tasks.py` file using distributed workers. The operations include edge detection, image thresholding, scaling, translation, rotation, perspective transformation, smoothing by averaging or blurring, and applying the Laplacian derivative. 
+This is a program that performs various image processing functions defined in the `tasks.py` file using distributed workers. The operations include edge detection, image thresholding, scaling, translation, rotation, perspective transformation, smoothing by averaging or blurring, and applying the Laplacian derivative.
 
 ## Requirements
 
@@ -64,6 +64,53 @@ prespectiveTransformation[Prespective Transformation] --> laplacianDerivative[La
 smoothBy_Averaging[Smooth by Averaging] --> smoothBy_Blur[Smooth by Blur]
 smoothBy_Averaging[Smooth by Averaging] --> laplacianDerivative[Laplacian Derivative]
 smoothBy_Blur[Smooth by Blur] --> laplacianDerivative[Laplacian Derivative]
+
+classDef lightMode fill:#FFFFFF, stroke:#333333, color:#333333;
+classDef darkMode fill:#333333, stroke:#FFFFFF, color:#FFFFFF;
+
+classDef lightModeLinks stroke:#333333;
+classDef darkModeLinks stroke:#FFFFFF;
+
+class edgeDetection,imageThresholding,scaling,translation,rotation,prespectiveTransformation,smoothBy_Averaging,smoothBy_Blur,laplacianDerivative lightMode;
+class edgeDetection,imageThresholding,scaling,translation,rotation,prespectiveTransformation,smoothBy_Averaging,smoothBy_Blur,laplacianDerivative darkMode;
+
+linkStyle 0 stroke:#FF4136, stroke-width:2px;
+linkStyle 1 stroke:#1ABC9C, stroke-width:2px;
+linkStyle 2 stroke:#0074D9, stroke-width:2px;
+linkStyle 3 stroke:#FFCC00, stroke-width:2px;
+linkStyle 4 stroke:#2ECC40, stroke-width:2px;
+linkStyle 5 stroke:#B10DC9, stroke-width:2px;
+linkStyle 6 stroke:#FF4136, stroke-width:2px;
+linkStyle 7 stroke:#1ABC9C, stroke-width:2px;
+linkStyle 8 stroke:#0074D9, stroke-width:2px;
+linkStyle 9 stroke:#FFCC00, stroke-width:2px;
+linkStyle 10 stroke:#2ECC40, stroke-width:2px;
+linkStyle 11 stroke:#B10DC9, stroke-width:2px;
+linkStyle 12 stroke:#FF4136, stroke-width:2px;
+linkStyle 13 stroke:#1ABC9C, stroke-width:2px;
+linkStyle 14 stroke:#0074D9, stroke-width:2px;
+linkStyle 15 stroke:#FFCC00, stroke-width:2px;
+linkStyle 16 stroke:#2ECC40, stroke-width:2px;
+linkStyle 17 stroke:#B10DC9, stroke-width:2px;
+linkStyle 18 stroke:#FF4136, stroke-width:2px;
+linkStyle 19 stroke:#1ABC9C, stroke-width:2px;
+linkStyle 20 stroke:#0074D9, stroke-width:2px;
+linkStyle 21 stroke:#FFCC00, stroke-width:2px;
+linkStyle 22 stroke:#2ECC40, stroke-width:2px;
+linkStyle 23 stroke:#B10DC9, stroke-width:2px;
+linkStyle 24 stroke:#FF4136, stroke-width:2px;
+linkStyle 25 stroke:#1ABC9C, stroke-width:2px;
+linkStyle 26 stroke:#0074D9, stroke-width:2px;
+linkStyle 27 stroke:#FFCC00, stroke-width:2px;
+linkStyle 28 stroke:#2ECC40, stroke-width:2px;
+linkStyle 29 stroke:#B10DC9, stroke-width:2px;
+linkStyle 30 stroke:#FF4136, stroke-width:2px;
+linkStyle 31 stroke:#1ABC9C, stroke-width:2px;
+linkStyle 32 stroke:#0074D9, stroke-width:2px;
+linkStyle 33 stroke:#FFCC00, stroke-width:2px;
+linkStyle 34 stroke:#2ECC40, stroke-width:2px;
+linkStyle 35 stroke:#B10DC9, stroke-width:2px;
+
 ```
 
 ## Function of `client.py`
@@ -109,6 +156,39 @@ GenerateCSV[GenerateCSV] --> closeFile[closeFile]
 openCSVFile[openCSVFile] --> writeToFile[writeToFile]
 openCSVFile[openCSVFile] --> closeFile[closeFile]
 writeToFile[writeToFile] --> closeFile[closeFile]
+
+classDef lightMode fill:#FFFFFF, stroke:#333333, color:#333333;
+classDef darkMode fill:#333333, stroke:#FFFFFF, color:#FFFFFF;
+
+classDef lightModeLinks stroke:#333333;
+classDef darkModeLinks stroke:#FFFFFF;
+
+class File,openFile,showFile,saveFile,Handler,restartData,checkForNoneResults,splitAndSend,applyToCompleteImage,checkProcessingState,checkAllResults,GenerateCSV,openCSVFile,writeToFile,closeFile lightMode;
+class File,openFile,showFile,saveFile,Handler,restartData,checkForNoneResults,splitAndSend,applyToCompleteImage,checkProcessingState,checkAllResults,GenerateCSV,openCSVFile,writeToFile,closeFile darkMode;
+
+linkStyle 0 stroke:#FF4136, stroke-width:2px;
+linkStyle 1 stroke:#1ABC9C, stroke-width:2px;
+linkStyle 2 stroke:#0074D9, stroke-width:2px;
+linkStyle 3 stroke:#FFCC00, stroke-width:2px;
+linkStyle 4 stroke:#2ECC40, stroke-width:2px;
+linkStyle 5 stroke:#B10DC9, stroke-width:2px;
+linkStyle 6 stroke:#FF4136, stroke-width:2px;
+linkStyle 7 stroke:#1ABC9C, stroke-width:2px;
+linkStyle 8 stroke:#0074D9, stroke-width:2px;
+linkStyle 9 stroke:#FFCC00, stroke-width:2px;
+linkStyle 10 stroke:#2ECC40, stroke-width:2px;
+linkStyle 11 stroke:#B10DC9, stroke-width:2px;
+linkStyle 12 stroke:#FF4136, stroke-width:2px;
+linkStyle 13 stroke:#1ABC9C, stroke-width:2px;
+linkStyle 14 stroke:#0074D9, stroke-width:2px;
+linkStyle 15 stroke:#FFCC00, stroke-width:2px;
+linkStyle 16 stroke:#2ECC40, stroke-width:2px;
+linkStyle 17 stroke:#B10DC9, stroke-width:2px;
+linkStyle 18 stroke:#FF4136, stroke-width:2px;
+linkStyle 19 stroke:#1ABC9C, stroke-width:2px;
+linkStyle 20 stroke:#0074D9, stroke-width:2px;
+linkStyle 21 stroke:#FFCC00, stroke-width:2px;
+linkStyle 22 stroke:#2ECC40, stroke-width:2px;
 ```
 
 ## Function of `celery_conf.py`
@@ -128,4 +208,23 @@ conf[conf] --> task_serializer[task_serializer]
 conf[conf] --> result_serializer[result_serializer]
 conf[conf] --> accept_content[accept_content]
 conf[conf] --> worker_send_task_events[worker_send_task_events]
+
+classDef lightMode fill:#FFFFFF, stroke:#333333, color:#333333;
+classDef darkMode fill:#333333, stroke:#FFFFFF, color:#FFFFFF;
+
+classDef lightModeLinks stroke:#333333;
+classDef darkModeLinks stroke:#FFFFFF;
+
+class app,Celery,broker,backend,include,conf,task_serializer,result_serializer,accept_content,worker_send_task_events lightMode;
+class app,Celery,broker,backend,include,conf,task_serializer,result_serializer,accept_content,worker_send_task_events darkMode;
+
+linkStyle 0 stroke:#FF4136, stroke-width:2px;
+linkStyle 1 stroke:#1ABC9C, stroke-width:2px;
+linkStyle 2 stroke:#0074D9, stroke-width:2px;
+linkStyle 3 stroke:#FFCC00, stroke-width:2px;
+linkStyle 4 stroke:#2ECC40, stroke-width:2px;
+linkStyle 5 stroke:#B10DC9, stroke-width:2px;
+linkStyle 6 stroke:#FF4136, stroke-width:2px;
+linkStyle 7 stroke:#1ABC9C, stroke-width:2px;
+linkStyle 8 stroke:#0074D9, stroke-width:2px;
 ```
