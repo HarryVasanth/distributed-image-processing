@@ -1,230 +1,251 @@
-# 🖼️ Distributed Image Processing System
+# 🖼️ Distributed Image Processing
 
-This is a program that performs various image processing functions defined in the `tasks.py` file using distributed workers. The operations include edge detection, image thresholding, scaling, translation, rotation, perspective transformation, smoothing by averaging or blurring, and applying the Laplacian derivative.
+[![CI](https://github.com/HarryVasanth/distributed-image-processing/actions/workflows/ci.yml/badge.svg)](https://github.com/HarryVasanth/distributed-image-processing/actions/workflows/ci.yml)
+
+A small but production-minded demo of **distributed image processing**: a CLI
+splits an image into horizontal strips, ships them to Celery workers over
+RabbitMQ, and stitches the processed strips back together. Results are returned
+through Redis, and optional Flower metrics are written to CSV.
+
+The project started in 2016 as a university experiment and has since been
+rebuilt around an installable package, typed configuration, validated tasks,
+JSON-only serialisation and a test suite.
+
+## Features
+
+- Nine OpenCV operations — edges, thresholding, scaling, translation, rotation,
+  perspective transform, box blur, Gaussian blur and Laplacian.
+- Horizontal chunking so large 4K images can be processed by several workers.
+- Works locally with one worker or across machines sharing a broker.
+- Interactive menu for exploring, plus a scriptable `imageproc` CLI.
+- Optional Flower integration that records per-task timings in CSV.
+- Secure-by-default JSON task protocol, payload limits and parameter validation.
+- Unit tests, Ruff linting/formatting, GitHub Actions and Dependabot.
+
+## Architecture
+
+```mermaid
+flowchart LR
+    subgraph Client
+        CLI["imageproc CLI / menu"]
+        Encode["Split image<br/>PNG + base64"]
+    end
+
+    Broker[("RabbitMQ<br/>broker")]
+    Backend[("Redis<br/>result backend")]
+    Flower["Flower<br/>optional metrics"]
+
+    subgraph Workers["Celery worker pool"]
+        W1["worker 1"]
+        W2["worker N"]
+    end
+
+    CLI --> Encode
+    Encode -->|"JSON tasks"| Broker
+    Broker --> W1
+    Broker --> W2
+    W1 --> Backend
+    W2 --> Backend
+    Backend -->|"base64 PNG results"| CLI
+    CLI --> Output[("results/ images")]
+    Broker -.->|"task events"| Flower
+    Backend -.->|"task info"| Flower
+```
+
+### Request flow
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant U as User
+    participant C as imageproc client
+    participant Q as RabbitMQ
+    participant W as Celery workers
+    participant R as Redis
+
+    U->>C: image, algorithm, parameters
+    C->>C: split into strips, encode PNG/base64
+    loop each strip
+        C->>Q: task(payload, **params)
+        Q->>W: deliver task
+        W->>W: decode, validate, process, encode
+        W->>R: store result
+    end
+    C->>R: poll AsyncResult
+    R-->>C: base64 PNG strip
+    C->>C: vstack strips
+    C-->>U: save results/<name>_<algorithm>_processed.<ext>
+```
+
+Celery carries only JSON. Images cross the wire as base64-encoded PNGs, never
+as pickled objects. That removes Celery's largest remote-code-execution risk.
 
 ## Requirements
 
-This program requires the installation of the Celery, NumPy, and SciPy libraries.
+- Python 3.12+
+- RabbitMQ 4 (broker)
+- Redis 8 (result backend)
+- Flower 2 (optional, for CSV metrics)
 
-```zsh
-pip install celery numpy scipy
+Python dependencies are pinned in [`pyproject.toml`](pyproject.toml).
+
+## Quick start
+
+```bash
+git clone https://github.com/HarryVasanth/distributed-image-processing.git
+cd distributed-image-processing
+
+python -m venv .venv
+source .venv/bin/activate
+pip install -e ".[dev]"
+
+docker compose up -d broker backend   # RabbitMQ + Redis on localhost
+celery -A imageproc.celery_app worker --loglevel=INFO --concurrency=4
 ```
 
-## Function of `task.py`
+In another terminal:
 
-The `tasks.py` defines a number of functions that perform various image processing operations. Here is a brief description of each function:
+```bash
+# Single image, split across workers
+imageproc --image 4K/8/lexus_lc500_2017-3840x2160.jpg --algorithm edge_detection
 
-- `edgeDetection`: This function applies the Canny edge detection algorithm to an image, using the median of the image's pixel intensities as a threshold.
-- `imageThresholding`: This function applies a simple threshold to an image, setting all pixels below a certain value to black and all others to white.
-- `scaling`: This function scales an image.
-- `translation`: This function translates (shifts) an image.
-- `rotation`: This function rotates an image.
-- `prespectiveTransformation`: This function applies a perspective transformation to an image.
-- `smoothBy_Averaging`: This function smooths an image by averaging the pixel values within a kernel.
-- `smoothBy_Blur`: This function smooths an image using a blur filter.
-- `laplacianDerivative`: This function applies the Laplacian derivative to an image, which can be used for edge detection.
+# Rotate a whole folder without saving intermediates
+imageproc --folder 4K/4 --algorithm rotation --param angle=90 --no-save
 
-### Flowchart for `tasks.py`
+# Write Flower metrics alongside the images
+IMAGEPROC_FLOWER_URL=http://localhost:5555 \
+  imageproc --image 4K/1/lexus_lc500_2017-3840x2160.jpg \
+  --algorithm smooth_blur --report-dir csvFile
 
-```mermaid
-graph LR
-edgeDetection[Edge Detection] --> imageThresholding[Image Thresholding]
-edgeDetection[Edge Detection] --> scaling[Scaling]
-edgeDetection[Edge Detection] --> translation[Translation]
-edgeDetection[Edge Detection] --> rotation[Rotation]
-edgeDetection[Edge Detection] --> prespectiveTransformation[Prespective Transformation]
-edgeDetection[Edge Detection] --> smoothBy_Averaging[Smooth by Averaging]
-edgeDetection[Edge Detection] --> smoothBy_Blur[Smooth by Blur]
-edgeDetection[Edge Detection] --> laplacianDerivative[Laplacian Derivative]
-imageThresholding[Image Thresholding] --> scaling[Scaling]
-imageThresholding[Image Thresholding] --> translation[Translation]
-imageThresholding[Image Thresholding] --> rotation[Rotation]
-imageThresholding[Image Thresholding] --> prespectiveTransformation[Prespective Transformation]
-imageThresholding[Image Thresholding] --> smoothBy_Averaging[Smooth by Averaging]
-imageThresholding[Image Thresholding] --> smoothBy_Blur[Smooth by Blur]
-imageThresholding[Image Thresholding] --> laplacianDerivative[Laplacian Derivative]
-scaling[Scaling] --> translation[Translation]
-scaling[Scaling] --> rotation[Rotation]
-scaling[Scaling] --> prespectiveTransformation[Prespective Transformation]
-scaling[Scaling] --> smoothBy_Averaging[Smooth by Averaging]
-scaling[Scaling] --> smoothBy_Blur[Smooth by Blur]
-scaling[Scaling] --> laplacianDerivative[Laplacian Derivative]
-translation[Translation] --> rotation[Rotation]
-translation[Translation] --> prespectiveTransformation[Prespective Transformation]
-translation[Translation] --> smoothBy_Averaging[Smooth by Averaging]
-translation[Translation] --> smoothBy_Blur[Smooth by Blur]
-translation[Translation] --> laplacianDerivative[Laplacian Derivative]
-rotation[Rotation] --> prespectiveTransformation[Prespective Transformation]
-rotation[Rotation] --> smoothBy_Averaging[Smooth by Averaging]
-rotation[Rotation] --> smoothBy_Blur[Smooth by Blur]
-rotation[Rotation] --> laplacianDerivative[Laplacian Derivative]
-prespectiveTransformation[Prespective Transformation] --> smoothBy_Averaging[Smooth by Averaging]
-prespectiveTransformation[Prespective Transformation] --> smoothBy_Blur[Smooth by Blur]
-prespectiveTransformation[Prespective Transformation] --> laplacianDerivative[Laplacian Derivative]
-smoothBy_Averaging[Smooth by Averaging] --> smoothBy_Blur[Smooth by Blur]
-smoothBy_Averaging[Smooth by Averaging] --> laplacianDerivative[Laplacian Derivative]
-smoothBy_Blur[Smooth by Blur] --> laplacianDerivative[Laplacian Derivative]
-
-classDef lightMode fill:#FFFFFF, stroke:#333333, color:#333333;
-classDef darkMode fill:#333333, stroke:#FFFFFF, color:#FFFFFF;
-
-classDef lightModeLinks stroke:#333333;
-classDef darkModeLinks stroke:#FFFFFF;
-
-class edgeDetection,imageThresholding,scaling,translation,rotation,prespectiveTransformation,smoothBy_Averaging,smoothBy_Blur,laplacianDerivative lightMode;
-class edgeDetection,imageThresholding,scaling,translation,rotation,prespectiveTransformation,smoothBy_Averaging,smoothBy_Blur,laplacianDerivative darkMode;
-
-linkStyle 0 stroke:#FF4136, stroke-width:2px;
-linkStyle 1 stroke:#1ABC9C, stroke-width:2px;
-linkStyle 2 stroke:#0074D9, stroke-width:2px;
-linkStyle 3 stroke:#FFCC00, stroke-width:2px;
-linkStyle 4 stroke:#2ECC40, stroke-width:2px;
-linkStyle 5 stroke:#B10DC9, stroke-width:2px;
-linkStyle 6 stroke:#FF4136, stroke-width:2px;
-linkStyle 7 stroke:#1ABC9C, stroke-width:2px;
-linkStyle 8 stroke:#0074D9, stroke-width:2px;
-linkStyle 9 stroke:#FFCC00, stroke-width:2px;
-linkStyle 10 stroke:#2ECC40, stroke-width:2px;
-linkStyle 11 stroke:#B10DC9, stroke-width:2px;
-linkStyle 12 stroke:#FF4136, stroke-width:2px;
-linkStyle 13 stroke:#1ABC9C, stroke-width:2px;
-linkStyle 14 stroke:#0074D9, stroke-width:2px;
-linkStyle 15 stroke:#FFCC00, stroke-width:2px;
-linkStyle 16 stroke:#2ECC40, stroke-width:2px;
-linkStyle 17 stroke:#B10DC9, stroke-width:2px;
-linkStyle 18 stroke:#FF4136, stroke-width:2px;
-linkStyle 19 stroke:#1ABC9C, stroke-width:2px;
-linkStyle 20 stroke:#0074D9, stroke-width:2px;
-linkStyle 21 stroke:#FFCC00, stroke-width:2px;
-linkStyle 22 stroke:#2ECC40, stroke-width:2px;
-linkStyle 23 stroke:#B10DC9, stroke-width:2px;
-linkStyle 24 stroke:#FF4136, stroke-width:2px;
-linkStyle 25 stroke:#1ABC9C, stroke-width:2px;
-linkStyle 26 stroke:#0074D9, stroke-width:2px;
-linkStyle 27 stroke:#FFCC00, stroke-width:2px;
-linkStyle 28 stroke:#2ECC40, stroke-width:2px;
-linkStyle 29 stroke:#B10DC9, stroke-width:2px;
-linkStyle 30 stroke:#FF4136, stroke-width:2px;
-linkStyle 31 stroke:#1ABC9C, stroke-width:2px;
-linkStyle 32 stroke:#0074D9, stroke-width:2px;
-linkStyle 33 stroke:#FFCC00, stroke-width:2px;
-linkStyle 34 stroke:#2ECC40, stroke-width:2px;
-linkStyle 35 stroke:#B10DC9, stroke-width:2px;
-
+# Interactive menu (no arguments)
+imageproc
 ```
 
-## Function of `client.py`
+Processed files land in `results/` as
+`<stem>_<algorithm>_processed.<ext>`. Use `--results-dir` to change that.
 
-The `client.py` defines a `File` class that has methods for opening and showing images, as well as saving images. It also defines a `Handler` class that has methods for managing the processing of images using tasks defined in the `tasks` module. Here is a brief description of each method:
+### Running workers on other machines
 
-- `File.openFile`: This method opens an image file and returns the image as a NumPy array.
-- `File.showFile`: This method displays an image using OpenCV.
-- `File.saveFile`: This method saves an image to a specified directory.
-- `Handler.restartData`: This method resets the task_ids and results dictionaries.
-- `Handler.checkForNoneResults`: This method checks if any of the values in the results dictionary are None.
-- `Handler.splitAndSend`: This method splits an image into chunks and sends each chunk to a task defined in the tasks module.
-- `Handler.applyToCompleteImage`: This method sends an entire image to a task defined in the tasks module.
-- `Handler.checkProcessingState`: This method checks the status of tasks and stores the results in the results dictionary.
-- `Handler.checkAllResults`: This method retrieves the results of tasks and displays and saves the resulting images.
+Every machine only needs the package, OpenCV and network access to the broker
+and backend:
 
-The `GenerateCSV` class has methods for creating and writing to a CSV file, as well as closing the file when finished.
-
-### Flowchart for `client.py`
-
-```mermaid
-graph LR
-File[File] --> openFile[openFile]
-File[File] --> showFile[showFile]
-File[File] --> saveFile[saveFile]
-openFile[openFile] --> showFile[showFile]
-openFile[openFile] --> saveFile[saveFile]
-Handler[Handler] --> restartData[restartData]
-Handler[Handler] --> checkForNoneResults[checkForNoneResults]
-Handler[Handler] --> splitAndSend[splitAndSend]
-Handler[Handler] --> applyToCompleteImage[applyToCompleteImage]
-Handler[Handler] --> checkProcessingState[checkProcessingState]
-Handler[Handler] --> checkAllResults[checkAllResults]
-checkProcessingState[checkProcessingState] --> checkForNoneResults[checkForNoneResults]
-checkProcessingState[checkProcessingState] --> GenerateCSV[GenerateCSV]
-checkProcessingState[checkProcessingState] --> checkAllResults[checkAllResults]
-checkAllResults[checkAllResults] --> showFile[showFile]
-checkAllResults[checkAllResults] --> saveFile[saveFile]
-checkAllResults[checkAllResults] --> GenerateCSV[GenerateCSV]
-GenerateCSV[GenerateCSV] --> openCSVFile[openCSVFile]
-GenerateCSV[GenerateCSV] --> writeToFile[writeToFile]
-GenerateCSV[GenerateCSV] --> closeFile[closeFile]
-openCSVFile[openCSVFile] --> writeToFile[writeToFile]
-openCSVFile[openCSVFile] --> closeFile[closeFile]
-writeToFile[writeToFile] --> closeFile[closeFile]
-
-classDef lightMode fill:#FFFFFF, stroke:#333333, color:#333333;
-classDef darkMode fill:#333333, stroke:#FFFFFF, color:#FFFFFF;
-
-classDef lightModeLinks stroke:#333333;
-classDef darkModeLinks stroke:#FFFFFF;
-
-class File,openFile,showFile,saveFile,Handler,restartData,checkForNoneResults,splitAndSend,applyToCompleteImage,checkProcessingState,checkAllResults,GenerateCSV,openCSVFile,writeToFile,closeFile lightMode;
-class File,openFile,showFile,saveFile,Handler,restartData,checkForNoneResults,splitAndSend,applyToCompleteImage,checkProcessingState,checkAllResults,GenerateCSV,openCSVFile,writeToFile,closeFile darkMode;
-
-linkStyle 0 stroke:#FF4136, stroke-width:2px;
-linkStyle 1 stroke:#1ABC9C, stroke-width:2px;
-linkStyle 2 stroke:#0074D9, stroke-width:2px;
-linkStyle 3 stroke:#FFCC00, stroke-width:2px;
-linkStyle 4 stroke:#2ECC40, stroke-width:2px;
-linkStyle 5 stroke:#B10DC9, stroke-width:2px;
-linkStyle 6 stroke:#FF4136, stroke-width:2px;
-linkStyle 7 stroke:#1ABC9C, stroke-width:2px;
-linkStyle 8 stroke:#0074D9, stroke-width:2px;
-linkStyle 9 stroke:#FFCC00, stroke-width:2px;
-linkStyle 10 stroke:#2ECC40, stroke-width:2px;
-linkStyle 11 stroke:#B10DC9, stroke-width:2px;
-linkStyle 12 stroke:#FF4136, stroke-width:2px;
-linkStyle 13 stroke:#1ABC9C, stroke-width:2px;
-linkStyle 14 stroke:#0074D9, stroke-width:2px;
-linkStyle 15 stroke:#FFCC00, stroke-width:2px;
-linkStyle 16 stroke:#2ECC40, stroke-width:2px;
-linkStyle 17 stroke:#B10DC9, stroke-width:2px;
-linkStyle 18 stroke:#FF4136, stroke-width:2px;
-linkStyle 19 stroke:#1ABC9C, stroke-width:2px;
-linkStyle 20 stroke:#0074D9, stroke-width:2px;
-linkStyle 21 stroke:#FFCC00, stroke-width:2px;
-linkStyle 22 stroke:#2ECC40, stroke-width:2px;
+```bash
+export IMAGEPROC_BROKER_URL=amqp://user:password@broker-host:5672//
+export IMAGEPROC_RESULT_BACKEND=redis://backend-host:6379/0
+celery -A imageproc.celery_app worker --loglevel=INFO --concurrency=4
 ```
 
-## Function of `celery_conf.py`
+## CLI reference
 
-The `celery_conf.py` sets up a `Celery` instance named `app` that is used to run tasks in a distributed manner. The `Celery` instance is configured with a message broker (AMQP) and a result backend (Redis) to enable communication between tasks and workers. The `include` parameter specifies a list of modules containing tasks that the `Celery` instance should be able to run. The `task_serializer`, `result_serializer`, and `accept_content` parameters specify the serialization format for tasks and results, and the `worker_send_task_events` parameter enables task event support.
-
-### Flowchart for `celery_conf.py`
-
-```mermaid
-graph LR
-app[app] --> Celery[Celery]
-Celery[Celery] --> broker[broker]
-Celery[Celery] --> backend[backend]
-Celery[Celery] --> include[include]
-app[app] --> conf[conf]
-conf[conf] --> task_serializer[task_serializer]
-conf[conf] --> result_serializer[result_serializer]
-conf[conf] --> accept_content[accept_content]
-conf[conf] --> worker_send_task_events[worker_send_task_events]
-
-classDef lightMode fill:#FFFFFF, stroke:#333333, color:#333333;
-classDef darkMode fill:#333333, stroke:#FFFFFF, color:#FFFFFF;
-
-classDef lightModeLinks stroke:#333333;
-classDef darkModeLinks stroke:#FFFFFF;
-
-class app,Celery,broker,backend,include,conf,task_serializer,result_serializer,accept_content,worker_send_task_events lightMode;
-class app,Celery,broker,backend,include,conf,task_serializer,result_serializer,accept_content,worker_send_task_events darkMode;
-
-linkStyle 0 stroke:#FF4136, stroke-width:2px;
-linkStyle 1 stroke:#1ABC9C, stroke-width:2px;
-linkStyle 2 stroke:#0074D9, stroke-width:2px;
-linkStyle 3 stroke:#FFCC00, stroke-width:2px;
-linkStyle 4 stroke:#2ECC40, stroke-width:2px;
-linkStyle 5 stroke:#B10DC9, stroke-width:2px;
-linkStyle 6 stroke:#FF4136, stroke-width:2px;
-linkStyle 7 stroke:#1ABC9C, stroke-width:2px;
-linkStyle 8 stroke:#0074D9, stroke-width:2px;
+```text
+imageproc [--image PATH | --folder DIR] --algorithm NAME
+          [--param NAME=VALUE ...] [--runs N]
+          [--results-dir DIR] [--report-dir DIR] [--flower-url URL]
+          [--no-split] [--no-save] [--load-color]
+          [--list-algorithms] [--version]
 ```
+
+| Option          | Default            | Purpose                                           |
+| --------------- | ------------------ | ------------------------------------------------- |
+| `--image`       | —                  | Process one image.                                |
+| `--folder`      | —                  | Process every supported image in a folder.        |
+| `--algorithm`   | —                  | Algorithm name (see below).                       |
+| `--param`       | algorithm defaults | Repeatable `NAME=VALUE` override.                 |
+| `--runs`        | `1`                | Timed repetitions; prints mean/min/max wall time. |
+| `--results-dir` | `results`          | Where processed images are written.               |
+| `--report-dir`  | disabled           | Where Flower CSV metrics are written.             |
+| `--flower-url`  | env                | Override `IMAGEPROC_FLOWER_URL`.                  |
+| `--no-split`    | off                | Send the whole image in one task.                 |
+| `--no-save`     | off                | Benchmark without writing images.                 |
+| `--load-color`  | off                | Load in colour instead of grayscale.              |
+
+## Algorithms
+
+| Name             | Split | Parameters (default)                                     |
+| ---------------- | ----- | -------------------------------------------------------- |
+| `edge_detection` | ✅    | `sigma=0.33` — Canny threshold spread (0–1).             |
+| `thresholding`   | ✅    | `threshold=127`, `max_value=255` — binary threshold.     |
+| `scaling`        | ✅    | `scale_x=1.0`, `scale_y` — independent resize factors.   |
+| `translation`    | ❌    | `tx=0`, `ty=0` — pixel offset, black border.             |
+| `rotation`       | ❌    | `angle=0`, `scale=1.0` — centre rotation.                |
+| `perspective`    | ❌    | `src`, `dst` — eight comma-separated coordinates each.   |
+| `smooth_average` | ✅    | `kernel_x=5`, `kernel_y=5` — box filter, odd kernels.    |
+| `smooth_blur`    | ✅    | `kernel_x=5`, `kernel_y=5` — Gaussian blur, odd kernels. |
+| `laplacian`      | ✅    | none — normalised 8-bit derivative.                      |
+
+Operations that alter geometry (`translation`, `rotation`, `perspective`) run on
+the whole image, because transforming each strip independently would introduce
+seams. `--no-split` also works for the remaining algorithms.
+
+Examples:
+
+```bash
+imageproc --image photo.jpg --algorithm thresholding --param threshold=180
+imageproc --image photo.jpg --algorithm perspective \
+  --param src=0,0,4000,0,0,2000,4000,2000 \
+  --param dst=100,100,3900,0,0,2100,4000,2000
+imageproc --folder photos --algorithm smooth_blur --param kernel_x=7 --param kernel_y=7 --runs 5
+```
+
+## Configuration
+
+| Variable                      | Default                               | Meaning                                  |
+| ----------------------------- | ------------------------------------- | ---------------------------------------- |
+| `IMAGEPROC_BROKER_URL`        | `amqp://guest:guest@localhost:5672//` | Celery broker.                           |
+| `IMAGEPROC_RESULT_BACKEND`    | `redis://localhost:6379/0`            | Celery result backend.                   |
+| `IMAGEPROC_FLOWER_URL`        | unset                                 | Enable Flower CSV metrics.               |
+| `IMAGEPROC_CHUNKS`            | `8`                                   | Number of strips per image.              |
+| `IMAGEPROC_POLL_INTERVAL`     | `0.5`                                 | Seconds between result polls.            |
+| `IMAGEPROC_TASK_TIMEOUT`      | `600`                                 | Hard task and client timeout in seconds. |
+| `IMAGEPROC_MAX_PAYLOAD_BYTES` | `67108864`                            | Maximum decoded payload size (64 MiB).   |
+
+Numeric variables are validated at startup; invalid values raise a clear error
+instead of failing later inside a worker.
+
+## Security notes
+
+- **No pickle.** Tasks and results use JSON only (`task_serializer`,
+  `result_serializer` and `accept_content`). Never enable pickle on an
+  untrusted broker.
+- **Secrets stay in the environment.** Broker credentials are not committed.
+- **Bounded payloads.** Base64 payloads are size-checked before decoding to
+  limit memory abuse.
+- **Validated inputs.** Every task validates types and ranges (sigma, kernels,
+  thresholds, scales) instead of trusting the client.
+- **Local infrastructure.** `compose.yaml` binds RabbitMQ and Redis to
+  `127.0.0.1`. Flower has no authentication by default — keep it on a private
+  network or put it behind a reverse proxy with auth.
+- **Bounded runtime.** Celery hard/soft time limits and client timeouts prevent
+  stuck jobs from occupying workers forever.
+
+## Project layout
+
+```text
+imageproc/
+  celery_app.py    Celery instance and JSON-safe configuration
+  config.py        Environment parsing and validation
+  codec.py         PNG <-> base64 transport codec
+  operations.py    Pure NumPy/OpenCV operations
+  tasks.py         Celery wrappers
+  imaging.py       Loading, splitting and saving images
+  reporting.py     Flower CSV metrics
+  client.py        Processing client, CLI and interactive menu
+tests/             Unit tests for codec, operations, storage and CLI logic
+compose.yaml       Local RabbitMQ + Redis
+```
+
+## Development
+
+```bash
+pip install -e ".[dev]"
+ruff check .
+ruff format --check .
+pytest
+```
+
+The test suite does not need a broker: operations and task wrappers are tested
+locally, while the client is exercised with fake Celery results.
+
+## License
+
+[MIT](LICENSE.md)
