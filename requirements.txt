@@ -30,7 +30,7 @@ pyOpenSSL==24.2.1
 pyserial==3.5
 python-apt==0.9.3.12
 python-debian==0.1.49
-pytz==2024.1
+pytz==2024.2
 redis==5.0.8
 requests==2.32.3
 RPi.GPIO==0.7.1
