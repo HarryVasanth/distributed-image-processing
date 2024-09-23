@@ -1,7 +1,7 @@
 opencv-python==4.10.0.84
 amqp==5.2.0
 anyjson==0.3.3
-billiard==4.2.0
+billiard==4.2.1
 chardet==5.2.0
 codebug-i2c-tether==0.3.0
 codebug-tether==0.9.1
