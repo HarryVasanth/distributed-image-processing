@@ -31,7 +31,7 @@ pyserial==3.5
 python-apt==0.9.3.12
 python-debian==0.1.49
 pytz==2024.2
-redis==5.0.8
+redis==5.1.0
 requests==2.32.3
 RPi.GPIO==0.7.1
 RTIMULib==7.2.1
