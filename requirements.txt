@@ -47,4 +47,4 @@ vine==5.1.0
 virtualenv==20.27.0
 virtualenv-clone==0.5.7
 virtualenvwrapper==6.1.1
-Werkzeug==3.0.6
+Werkzeug==3.1.2
