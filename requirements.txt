@@ -1,5 +1,5 @@
 opencv-python==4.10.0.84
-amqp==5.2.0
+amqp==5.3.1
 anyjson==0.3.3
 billiard==4.2.1
 chardet==5.2.0
