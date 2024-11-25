@@ -40,7 +40,7 @@ sense-hat==2.6.0
 six==1.16.0
 smbus==1.1.post2
 spidev==3.6
-stevedore==5.3.0
+stevedore==5.4.0
 twython==3.9.1
 urllib3==2.2.3
 vine==5.1.0
