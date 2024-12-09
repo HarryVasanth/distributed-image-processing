@@ -37,7 +37,7 @@ RPi.GPIO==0.7.1
 RTIMULib==7.2.1
 sense-emu==1.2.1
 sense-hat==2.6.0
-six==1.16.0
+six==1.17.0
 smbus==1.1.post2
 spidev==3.6
 stevedore==5.4.0
