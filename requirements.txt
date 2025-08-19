@@ -15,7 +15,7 @@ kombu==5.4.2
 MarkupSafe==3.0.2
 mcpi==1.2.1
 numpy==2.2.4
-pbr==6.1.1
+pbr==7.0.0
 pgzero==1.2.1
 picamera==1.13
 picraft==1.0
