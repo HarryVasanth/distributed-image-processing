@@ -39,7 +39,7 @@ sense-emu==1.2.1
 sense-hat==2.6.0
 six==1.17.0
 smbus==1.1.post2
-spidev==3.6
+spidev==3.8
 stevedore==5.4.1
 twython==3.9.1
 urllib3==2.3.0
