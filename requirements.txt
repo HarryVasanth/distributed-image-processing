@@ -14,7 +14,7 @@ Jinja2==3.1.6
 kombu==5.6.2
 MarkupSafe==3.0.2
 mcpi==1.2.1
-numpy==2.4.0
+numpy==2.4.1
 pbr==6.1.1
 pgzero==1.2.1
 picamera==1.13
