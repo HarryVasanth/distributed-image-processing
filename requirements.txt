@@ -1,4 +1,4 @@
-opencv-python==4.12.0.88
+opencv-python==4.13.0.92
 amqp==5.3.1
 anyjson==0.3.3
 billiard==4.2.4
